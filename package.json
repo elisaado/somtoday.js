@@ -1,0 +1,22 @@
+{
+  "name": "somtoday.js",
+  "version": "1.0.0",
+  "description": "The SOMtoday JavaScript library used for Debyl.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/elisaado/SOMtoday.js.git"
+  },
+  "author": "Eli Saado",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/elisaado/SOMtoday.js/issues"
+  },
+  "homepage": "https://github.com/elisaado/SOMtoday.js#readme",
+  "dependencies": {
+    "node-fetch": "^2.6.0"
+  }
+}

@@ -1,5 +1,4 @@
 class Leerling {
-      Type: string;
       Leerlingnummer: int;
       Roepnaam: string;
       Achternaam: string;

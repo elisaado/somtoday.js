@@ -1,0 +1,19 @@
+
+
+{
+"herkansingstype": "EenKeerHoogste",
+"resultaat": "7.1",
+"geldendResultaat": "7.1",
+"datumInvoer": "2019-07-05T12:33:19.658+0200",
+"teltNietmee": false,
+"toetsNietGemaakt": false,
+"leerjaar": 4,
+"periode": 3,
+"weging": 5,
+"examenWeging": 5,
+"isExamendossierResultaat": true,
+"isVoortgangsdossierResultaat": true,
+"type": "Toetskolom",
+"omschrijving": "T3",
+"volgnummer": 431
+},

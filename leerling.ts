@@ -1,11 +1,11 @@
 class Leerling {
-      Leerlingnummer: int;
-      Roepnaam: string;
-      Achternaam: string;
-      Email: string;
-      MobielNummer: string;
-      Geboortedatum: Date;
-      Geslacht: string;
-      
+  id: int;
+  leerlingNummer: int;
+  roepnaam: string;
+  achternaam: string;
+  email: string;
+  mobielNummer: string;
+  geboortedatum: Date;
+  geslacht: string;
 }
-   
+

@@ -1,6 +1,6 @@
 class Leerling {
-  id: int;
-  leerlingNummer: int;
+  id: number;
+  leerlingNummer: number;
   roepnaam: string;
   achternaam: string;
   email: string;

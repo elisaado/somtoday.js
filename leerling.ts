@@ -8,4 +8,3 @@ class Leerling {
   geboortedatum: Date;
   geslacht: string;
 }
-

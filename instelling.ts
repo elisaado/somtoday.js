@@ -1,5 +1,5 @@
 class Instelling {
-  plaats: string;
+  uuid: string;
   naam: string;
   plaats: string;
 }

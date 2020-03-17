@@ -1,2 +1,4 @@
 # SOMtoday.js
-The SOMtoday JavaScript library used for Debyl.
+A JavaScript library for the SOMtoday REST API.
+
+The library currently does not support permissions.

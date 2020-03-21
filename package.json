@@ -16,5 +16,7 @@
     "url": "https://github.com/elisaado/SOMtoday.js/issues"
   },
   "homepage": "https://github.com/elisaado/SOMtoday.js#readme",
-  "dependencies": {}
+  "dependencies": {
+    "axios": "^0.19.2"
+  }
 }

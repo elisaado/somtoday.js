@@ -1,10 +1,12 @@
 export class Leerling {
-  id: number;
-  leerlingNummer: number;
-  roepnaam: string;
-  achternaam: string;
-  email: string;
-  mobielNummer: string;
-  geboortedatum: Date;
-  geslacht: string;
+  constructor(
+    public id: number,
+    public leerlingNummer: number,
+    public roepnaam: string,
+    public achternaam: string,
+    public email: string,
+    public mobielNummer: string,
+    public geboortedatum: Date,
+    public geslacht: string,
+  ) {}
 }

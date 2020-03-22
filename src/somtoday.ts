@@ -2,6 +2,13 @@ import axios from 'axios';
 import { Leerling } from './leerling';
 import { Instelling } from './instelling';
 
+interface AuthenticatedArgs {
+  accessToken: string,
+  refreshToken: string,
+  idToken: string,
+  organisation: Instelling
+}
+
 class SOMToday {
   _serversBaseURL: string = 'https://servers.somtoday.nl';
   _authBaseURL: string = 'https://production.somtoday.nl';
@@ -13,4 +20,7 @@ class SOMToday {
   user: Leerling; // no parent support (yet?)
   organisation: Instelling;
   
+  constructor(args: AuthenticatedArgs) {
+
+  }
 }

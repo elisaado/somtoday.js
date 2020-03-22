@@ -23,6 +23,17 @@ class SOMToday {
   _authenticated: boolean;
   
   constructor(args: AuthenticatedArgs) {
+    // check if token is valid
+    this._accessToken = args.accessToken;
+    this._refreshToken = args.refreshToken;
+    this._idToken = args.idToken;
+    this._baseURL = args.baseURL;
 
+    // this.getStudents()
+    // if success: authenticated = true
+    // if fail:
+    // refresh token
+    // if refresh fail:
+    // authenticated stays false (and returns error?)
   }
 }

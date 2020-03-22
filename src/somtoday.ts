@@ -19,6 +19,8 @@ class SOMToday {
 
   user: Leerling; // no parent support (yet?)
   organisation: Instelling;
+
+  _authenticated: boolean;
   
   constructor(args: AuthenticatedArgs) {
 

@@ -6,7 +6,7 @@ interface AuthenticatedArgs {
   accessToken: string,
   refreshToken: string,
   idToken: string,
-  organisation: Instelling
+  baseURL: string
 }
 
 class SOMToday {

@@ -1,5 +1,7 @@
 export class Vak {
-  id: number;
-  afkorting: string;
-  naam: string;
+  constructor(
+    public id: number,
+    public afkorting: string,
+    public naam: string,
+  ) {}
 }

@@ -1,5 +1,7 @@
 export class Instelling {
-  uuid: string;
-  naam: string;
-  plaats: string;
+  constructor(
+    public uuid: string,
+    public naam: string,
+    public plaats: string,
+  ) {}
 }

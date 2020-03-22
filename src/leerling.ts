@@ -1,4 +1,4 @@
-class Leerling {
+export class Leerling {
   id: number;
   leerlingNummer: number;
   roepnaam: string;

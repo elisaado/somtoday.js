@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { Leerling } from './leerling';
-import { Instelling } from './instelling';
+import { Pupil } from './pupil';
+import { Organisation } from './organisation';
 
 interface AuthenticatedArgs {
   accessToken: string,
@@ -17,8 +17,8 @@ class SOMToday {
   _refreshToken: string;
   _idToken: string;
 
-  user: Leerling; // no parent support (yet?)
-  organisation: Instelling;
+  user: Pupil; // no parent support (yet?)
+  organisation: Organisation;
 
   _authenticated: boolean;
   

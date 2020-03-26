@@ -22,7 +22,8 @@ class SOMToday {
 
   _authenticated: boolean;
   
-  constructor(args: AuthenticatedArgs) {
+  constructor(args?: AuthenticatedArgs) {
+    if (!args) return;
     // check if token is valid
     this._accessToken = args.accessToken;
     this._refreshToken = args.refreshToken;

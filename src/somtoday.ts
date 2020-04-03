@@ -9,32 +9,30 @@ interface AuthenticatedArgs {
   baseURL: string
 }
 
+interface Query {
+  name: string,
+  uuid: string
+}
+
 class SOMToday {
   _serversBaseURL: string = 'https://servers.somtoday.nl';
-  _authBaseURL: string = 'https://production.somtoday.nl';
-  _baseURL: string;
-  _accessToken: string;
-  _refreshToken: string;
-  _idToken: string;
 
-  user: Pupil; // no parent support (yet?)
-  organisation: Organisation;
+  // Retrieve all organisations
+  async getOrganisations() {
+    return axios.get(`${this._serversBaseURL}/organisaties.json`)
+    .then(response => response.data)
+    .then(data => data[0].instellingen.map((organisationInfo: any) => {
+      return new Organisation(
+        organisationInfo.uuid,
+        organisationInfo.naam,
+        organisationInfo.plaats,
+      );
+    }));
+  }
 
-  _authenticated: boolean;
-  
-  constructor(args?: AuthenticatedArgs) {
-    if (!args) return;
-    // check if token is valid
-    this._accessToken = args.accessToken;
-    this._refreshToken = args.refreshToken;
-    this._idToken = args.idToken;
-    this._baseURL = args.baseURL;
+  // TODO
+  // Retreive a single organisation
+  searchOrganisation(query: Query) {
 
-    // this.getStudents()
-    // if success: authenticated = true
-    // if fail:
-    // refresh token
-    // if refresh fail:
-    // authenticated stays false (and returns error?)
   }
 }

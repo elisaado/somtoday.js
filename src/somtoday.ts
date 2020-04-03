@@ -1,6 +1,7 @@
 import axios from 'axios';
-import { Pupil } from './pupil';
 import { Organisation } from './organisation';
+
+import Fuse = require('fuse.js');
 
 interface AuthenticatedArgs {
   accessToken: string,

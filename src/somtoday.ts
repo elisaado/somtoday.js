@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Organisation } from './organisation';
+import Organisation from './organisation';
 
 import Fuse = require('fuse.js');
 

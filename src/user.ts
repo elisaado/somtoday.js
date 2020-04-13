@@ -8,6 +8,11 @@ class User {
     public mobileNumber: string,
     public birthDate: Date,
     public gender: string,
+
+    public accessToken: string,
+    public refreshToken: string,
+    public idToken: string,
+    public somtodayApiUrl: string,
   ) {}
 }
 

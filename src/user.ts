@@ -1,4 +1,4 @@
-export class Pupil {
+class User {
   constructor(
     public id: number,
     public pupilNumber: number,
@@ -10,3 +10,5 @@ export class Pupil {
     public gender: string,
   ) {}
 }
+
+export { User as default };

@@ -1,3 +1,8 @@
+interface Credentials {
+  username: string,
+  password: string
+}
+
 class Organisation {
   constructor(
     public uuid: string,

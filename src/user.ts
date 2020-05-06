@@ -1,6 +1,7 @@
 class User {
   constructor(
     public id: number,
+    public uuid: string,
     public pupilNumber: number,
     public firstName: string,
     public lastName: string,

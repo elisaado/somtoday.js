@@ -1,8 +1,22 @@
-import axios from 'axios';
+import Debug from 'debug';
+import axios, { AxiosBasicCredentials } from 'axios';
 import { APP_ID, APP_SECRET } from './constants';
 import { InvalidTokenError } from './errors';
 
 import qs = require('qs');
+
+const log = Debug('user');
+
+// currently all methods we need
+type Methods = 'get' | 'post';
+
+interface CallParams {
+  method: Methods,
+  url: string,
+  data?: object,
+  headers?: any,
+  auth?: AxiosBasicCredentials,
+}
 
 class User {
 
@@ -16,9 +30,9 @@ class User {
   public birthDate: Date;
   public gender: string;
 
-  public authenticated: Promise<boolean>;
+  public authenticated: Promise<User>;
 
-  private _authenticatedResolver: (value?: boolean | PromiseLike<boolean>) => void;
+  private _authenticatedResolver: (value?: User | PromiseLike<User>) => void;
   private _authenticatedRejecter: (value?: Error | PromiseLike<Error>) => void;
 
   constructor(
@@ -27,9 +41,10 @@ class User {
     public idToken: string,
     public somtodayApiUrl: string,
   ) {
+    log('Initializing user');
     this._fetchInfo = this._fetchInfo.bind(this);
     this._refreshToken = this._refreshToken.bind(this);
-
+    this._call = this._call.bind(this);
 
     this.authenticated = new Promise((resolve, reject) => {
       this._authenticatedResolver = resolve;
@@ -37,31 +52,7 @@ class User {
     });
 
     this._fetchInfo()
-      .catch(e => {
-        if (e.response.status === 401) {
-          return this._refreshToken()
-            .then(status => {
-              if (!status) return undefined;
-              return this._fetchInfo();
-            });
-        }
-
-        throw e;
-      });
-  }
-
-  private async _fetchInfo() {
-    console.log('Fetching user info');
-
-    return axios.get(`${this.somtodayApiUrl}/rest/v1/leerlingen`, {
-      headers: {
-        Authorization: `Bearer ${this.accessToken}`,
-      },
-    })
-      .then(infoResponse => {
-        const { data } = infoResponse;
-        const userInfo = data.items[0];
-
+      .then(userInfo => {
         this.id = userInfo.links[0].id;
         this.uuid = userInfo.UUID;
         this.pupilNumber = userInfo.leerlingnummer;
@@ -71,15 +62,37 @@ class User {
         this.mobileNumber = userInfo.mobielNummer;
         this.birthDate = new Date(userInfo.geboortedatum);
         this.gender = userInfo.geslacht;
+        this._authenticatedResolver(this);
+      });
+    // .catch(e => {
+    //   // if (e instanceof InvalidTokenError) {
+    //   //   log("Unable to refresh token, please make sure you are using the correct token.")
+    //   //   throw new InvalidTokenError();
+    //   // }
+    // });
+  }
 
-        this._authenticatedResolver(true);
+  private async _fetchInfo() {
+    log('Fetching user info');
+
+    return this._call({
+      method: 'get',
+      url: '/rest/v1/leerlingen',
+    })
+      .then(infoResponse => {
+        const { data } = infoResponse;
+        const userInfo = data.items[0];
+
+        return userInfo;
       });
   }
 
-  private async _refreshToken(): Promise<boolean | void> {
+  private async _refreshToken(refreshToken: string): Promise<boolean | void> {
+    log('Token expired');
+    log('Refreshing user token');
     const body = {
       grant_type: 'refresh_token',
-      refresh_token: this.refreshToken,
+      refresh_token: refreshToken,
       scope: 'openid',
     };
 
@@ -101,10 +114,40 @@ class User {
         return true;
       })
       .catch(e => {
-        if (e.response.data.error === 'invalid_grant') {
+        if (e.response.data.error === 'invalid_grant' || (e.response.data.error === 'access_denied' && e.response.data.error_description === 'Access denied by resource owner or authorization server: Unauthorized account')) {
+          log('Unable to refresh token');
           // todo: make this better
           this._authenticatedRejecter(new InvalidTokenError());
         }
+      });
+  }
+
+  private async _call(callParams: CallParams): Promise<any> {
+    // to prevent assigning to parametres
+    const params = Object.create(callParams);
+    if (!params.headers) params.headers = {};
+    if (!params.headers.Authorization) {
+      params.headers.Authorization = `Bearer ${this.accessToken}`;
+    }
+
+    return axios({
+      method: params.method,
+      url: params.url,
+      data: params.data,
+      headers: params.headers,
+      auth: params.auth,
+      baseURL: this.somtodayApiUrl,
+    })
+      .catch(e => {
+        if (e.response.status === 401 && !e.response.data) {
+          return this._refreshToken(this.refreshToken)
+            .then(status => {
+              if (!status) throw new InvalidTokenError();
+              return this._call(callParams);
+            });
+        }
+
+        throw e;
       });
   }
 

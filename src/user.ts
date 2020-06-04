@@ -2,6 +2,8 @@ import Debug from 'debug';
 import axios, { AxiosBasicCredentials } from 'axios';
 import { APP_ID, APP_SECRET } from './constants';
 import { InvalidTokenError } from './errors';
+import Grade from './grade';
+import { Course } from './course';
 
 import qs = require('qs');
 
@@ -72,6 +74,55 @@ class User {
     // });
   }
 
+  async getGrades(): Promise<Array<Grade>> {
+    const grades: Array<Grade> = [];
+
+    let i = 0;
+    let j = 99;
+
+    // do this until there are no more grades
+    for (;;) {
+      const { data } = await this._call({
+        method: 'get',
+        url: `/resultaten/huidigVoorLeerling/${this.id}`,
+        headers: {
+          range: `items=${i}-${j}`,
+        },
+      });
+
+      i += 100;
+      j += 100;
+
+      const { items } = data;
+      items.forEach((grade: any) => {
+        const { vak } = grade;
+        const course = new Course(vak.links[0].id, vak.afkorting, vak.naam);
+
+
+        grades.push(new Grade(
+          grade.links[0].id,
+          grade.resultaat,
+          grade.type,
+          grade.omschrijving,
+          grade.leerjaar,
+          grade.periode,
+          grade.weging,
+          grade.examenWeging,
+          grade.toetsNietGemaakt,
+          grade.teltNietmee,
+          grade.isExamendossierResultaat,
+          grade.isVoortgangsdossierResultaat,
+          new Date(grade.datumInvoer),
+          course,
+        ));
+      });
+
+      if (data.items.length < 100) break;
+    }
+
+    return grades;
+  }
+
   private async _fetchInfo() {
     log('Fetching user info');
 
@@ -123,6 +174,8 @@ class User {
   }
 
   private async _call(callParams: CallParams): Promise<any> {
+    log(`a call has been made to ${callParams.url}`);
+
     // to prevent assigning to parametres
     const params = Object.create(callParams);
     if (!params.headers) params.headers = {};

@@ -77,7 +77,7 @@ class User {
 
     return this._call({
       method: 'get',
-      url: '/rest/v1/leerlingen',
+      url: '/leerlingen',
     })
       .then(infoResponse => {
         const { data } = infoResponse;
@@ -136,7 +136,7 @@ class User {
       data: params.data,
       headers: params.headers,
       auth: params.auth,
-      baseURL: this.somtodayApiUrl,
+      baseURL: `${this.somtodayApiUrl}/rest/v1`,
     })
       .catch(e => {
         if (e.response.status === 401 && !e.response.data) {

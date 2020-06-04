@@ -3,7 +3,7 @@ import axios, { AxiosBasicCredentials } from 'axios';
 import { APP_ID, APP_SECRET } from './constants';
 import { InvalidTokenError } from './errors';
 import Grade from './grade';
-import { Course } from './course';
+import Course from './course';
 
 import qs = require('qs');
 
@@ -120,6 +120,7 @@ class User {
       if (data.items.length < 100) break;
     }
 
+    grades.sort((a, b) => a.dateOfEntry.getTime() - b.dateOfEntry.getTime());
     return grades;
   }
 

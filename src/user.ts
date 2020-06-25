@@ -97,7 +97,7 @@ class User {
       items.forEach((grade: any) => {
         const { vak } = grade;
         const course = new Course(vak.links[0].id, vak.afkorting, vak.naam);
-
+        if (!grade.resultaat) grade.resultaat = grade.resultaatLabelAfkorting;
 
         grades.push(new Grade(
           grade.links[0].id,

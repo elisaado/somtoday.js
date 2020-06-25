@@ -1,3 +1,4 @@
+import { EventEmitter } from 'events';
 import Debug from 'debug';
 import axios, { AxiosBasicCredentials } from 'axios';
 import { APP_ID, APP_SECRET } from './constants';
@@ -20,7 +21,7 @@ interface CallParams {
   auth?: AxiosBasicCredentials,
 }
 
-class User {
+class User extends EventEmitter {
 
   public id: number;
   public uuid: string;
@@ -43,6 +44,8 @@ class User {
     public idToken: string,
     public somtodayApiUrl: string,
   ) {
+    super();
+
     log('Initializing user');
     this._fetchInfo = this._fetchInfo.bind(this);
     this._refreshToken = this._refreshToken.bind(this);
@@ -162,6 +165,7 @@ class User {
         this.accessToken = data.access_token;
         this.refreshToken = data.refresh_token;
         this.idToken = data.id_token;
+        this.emit('token_refreshed');
 
         return true;
       })

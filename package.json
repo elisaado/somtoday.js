@@ -1,8 +1,9 @@
 {
   "name": "somtoday.js",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "The SOMtoday JavaScript library used for Debyl.",
-  "main": "index.js",
+  "main": "dist/somtoday.js",
+  "types": "dist/somtoday.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

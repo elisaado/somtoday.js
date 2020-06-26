@@ -1,13 +1,19 @@
 {
   "compilerOptions": {
+    "target": "ES5",
     "module": "commonjs",
     "noImplicitAny": true,
     "removeComments": true,
     "preserveConstEnums": true,
     "sourceMap": true,
-    "outDir": "build",
-    "lib": ["ES2020"]
+    "strict": true,
+    "declaration": true,
+    "outDir": "dist",
+    "lib": ["ES2020", "es2017", "es7", "es6", "dom"],
   },
   "include": ["src/*"],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }

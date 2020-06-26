@@ -26,26 +26,30 @@ interface Query {
 }
 
 class SOMToday {
+
   organisationsURL: string = 'https://servers.somtoday.nl/organisaties.json';
 
   // Retrieve all organisations
   async getOrganisations(): Promise<Array<Organisation>> {
     return axios.get(this.organisationsURL)
-      .then((response) => response.data)
-      .then((data) => data[0].instellingen.map((organisationInfo: any) => new Organisation(
+      .then(response => response.data)
+      .then(data => data[0].instellingen.map((organisationInfo: any) => new Organisation(
         organisationInfo.uuid,
         organisationInfo.naam,
         organisationInfo.plaats,
       )));
   }
 
+  // TODO
+  // Make a function to retreive an array of organisations by name
+
   // Retreive a single organisation
   // Query can be (part of) an organisation name
   // It can also be its UUID
   async searchOrganisation(query: Query): Promise<Organisation> {
     return axios.get(this.organisationsURL)
-      .then((response) => response.data)
-      .then((data) => {
+      .then(response => response.data)
+      .then(data => {
         const organisations = data[0].instellingen;
         if (query.uuid) {
           const organisationData = organisations.find(
@@ -72,6 +76,7 @@ class SOMToday {
         throw new Error('No query provided');
       });
   }
+
 }
 
 const SOM = new SOMToday();

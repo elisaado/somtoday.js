@@ -23,20 +23,20 @@ interface CallParams {
 
 class User extends EventEmitter {
 
-  public id: number;
-  public uuid: string;
-  public pupilNumber: number;
-  public firstName: string;
-  public lastName: string;
-  public email: string;
-  public mobileNumber: string;
-  public birthDate: Date;
-  public gender: string;
+  public id!: number;
+  public uuid!: string;
+  public pupilNumber!: number;
+  public firstName!: string;
+  public lastName!: string;
+  public email!: string;
+  public mobileNumber!: string;
+  public birthDate!: Date;
+  public gender!: string;
 
   public authenticated: Promise<User>;
 
-  private _authenticatedResolver: (value?: User | PromiseLike<User>) => void;
-  private _authenticatedRejecter: (value?: Error | PromiseLike<Error>) => void;
+  private _authenticatedResolver!: (value?: User | PromiseLike<User>) => void;
+  private _authenticatedRejecter!: (value?: Error | PromiseLike<Error>) => void;
 
   constructor(
     public accessToken: string,

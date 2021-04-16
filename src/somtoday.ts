@@ -1,7 +1,7 @@
-import axios from 'axios';
-import Organisation from './organisation';
+import axios from "axios";
+import Organisation from "./organisation";
 
-import Fuse = require('fuse.js');
+import Fuse = require("fuse.js");
 
 const fuseOptions = {
   isCaseSensitive: false,
@@ -14,30 +14,32 @@ const fuseOptions = {
   threshold: 0,
   location: 0,
   distance: 100,
-  keys: [
-    'naam',
-    'uuid',
-  ],
+  keys: ["naam", "uuid"],
 };
 
 interface Query {
-  name?: string,
-  uuid?: string
+  name?: string;
+  uuid?: string;
 }
 
 class SOMToday {
+  organizationsURL: string = "https://servers.somtoday.nl/organisaties.json";
 
-  organisationsURL: string = 'https://servers.somtoday.nl/organisaties.json';
-
-  // Retrieve all organisations
-  async getOrganisations(): Promise<Array<Organisation>> {
-    return axios.get(this.organisationsURL)
-      .then(response => response.data)
-      .then(data => data[0].instellingen.map((organisationInfo: any) => new Organisation(
-        organisationInfo.uuid,
-        organisationInfo.naam,
-        organisationInfo.plaats,
-      )));
+  // Retrieve all organizations
+  async getOrganizations(): Promise<Array<Organisation>> {
+    return axios
+      .get(this.organizationsURL)
+      .then((response) => response.data)
+      .then((data) =>
+        data[0].instellingen.map(
+          (organisationInfo: any) =>
+            new Organisation(
+              organisationInfo.uuid,
+              organisationInfo.naam,
+              organisationInfo.plaats,
+            ),
+        ),
+      );
   }
 
   // TODO
@@ -47,12 +49,13 @@ class SOMToday {
   // Query can be (part of) an organisation name
   // It can also be its UUID
   async searchOrganisation(query: Query): Promise<Organisation> {
-    return axios.get(this.organisationsURL)
-      .then(response => response.data)
-      .then(data => {
-        const organisations = data[0].instellingen;
+    return axios
+      .get(this.organizationsURL)
+      .then((response) => response.data)
+      .then((data) => {
+        const organizations = data[0].instellingen;
         if (query.uuid) {
-          const organisationData = organisations.find(
+          const organisationData = organizations.find(
             (organisation: any) => organisation.uuid === query.uuid,
           );
 
@@ -63,7 +66,7 @@ class SOMToday {
           );
         }
         if (query.name) {
-          const fuse = new Fuse(organisations, fuseOptions);
+          const fuse = new Fuse(organizations, fuseOptions);
 
           const organisationData: any = fuse.search(query.name)[0].item;
           return new Organisation(
@@ -73,10 +76,9 @@ class SOMToday {
           );
         }
 
-        throw new Error('No query provided');
+        throw new Error("No query provided");
       });
   }
-
 }
 
 const SOM = new SOMToday();

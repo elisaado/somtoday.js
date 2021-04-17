@@ -14,6 +14,7 @@ export default class baseApiClass {
   public async call(optionsParam?: AxiosRequestConfig): Promise<any> {
     let options: AxiosRequestConfig = Object.assign({}, this.axiosOptions);
     Object.assign(options, optionsParam);
+    Object.assign(options.headers, this.axiosOptions.headers);
     if (!options?.url) throw new Error("No request url provided");
     else if (!options?.method) throw new Error("No request method provided");
 

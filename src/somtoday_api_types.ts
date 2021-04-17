@@ -20,9 +20,7 @@ export interface api_huiswerk_datum {
 export interface api_huiswerk_week {
   items: Array<api_huiswerk_week_item>;
 }
-export interface api_organisaties {
-  instellingen: Array<api_organisaties_item>;
-}
+export type api_organisaties = [{ instellingen: Array<api_organisaties_item> }];
 
 // Items
 export interface api_leerling_item {

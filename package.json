@@ -5,7 +5,8 @@
   "main": "dist/somtoday.js",
   "types": "dist/somtoday.d.ts",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "test": "npm run build && node ./dist/test/index.js"
   },
   "repository": {
     "type": "git",

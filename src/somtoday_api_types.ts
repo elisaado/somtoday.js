@@ -1,3 +1,15 @@
+export interface api_auth_item {
+  access_token: string;
+  refresh_token: string;
+  somtoday_api_url: string;
+  somtoday_oop_url: string;
+  scope: "openid";
+  somtoday_tenant: string;
+  id_token: string;
+  token_type: string;
+  expires_in: number;
+}
+
 // Raw api results
 export interface api_leerling {
   items: Array<api_leerling_item>;

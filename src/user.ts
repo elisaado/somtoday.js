@@ -8,130 +8,58 @@ import Course from "./course";
 
 import qs = require("qs");
 import baseApiClass from "./baseApiClass";
-import { api_cijfer, api_leerling, geslacht } from "./somtoday_api_types";
+import {
+  api_auth_item,
+  api_cijfer,
+  api_leerling,
+  geslacht,
+} from "./somtoday_api_types";
+import Student from "./student";
+import { Credentials } from "./organisation";
 
 const log = Debug("user");
 
 class User extends baseApiClass {
-  public id!: number;
-  public uuid!: string;
-  public pupilNumber!: number;
-  public firstName!: string;
-  public lastName!: string;
-  public email!: string;
-  public mobileNumber?: string;
-  public birthDate!: Date;
-  public gender!: geslacht;
+  public accessToken!: string;
+  public refreshToken!: string;
+  public idToken!: string;
+  public somtodayApiUrl!: string;
 
   public authenticated: Promise<User>;
-
   private _authenticatedResolver!: (value: User | PromiseLike<User>) => void;
   private _authenticatedRejecter!: (value?: Error | PromiseLike<Error>) => void;
 
-  constructor(
-    public accessToken: string,
-    public refreshToken: string,
-    public idToken: string,
-    public somtodayApiUrl: string,
-  ) {
+  constructor(credentials: Credentials) {
     super({
-      baseURL: `${somtodayApiUrl}/rest/v1`,
-      headers: { Authorization: `Bearer ${accessToken}` },
+      method: "POST",
+      baseURL: `https://production.somtoday.nl/oauth2/token`,
+      data: {
+        grant_type: "password",
+        username: `${credentials.username}`,
+        password: credentials.password,
+        scope: "openid",
+        client_id: APP_ID,
+      },
     });
-
     log("Initializing user");
-    this._fetchInfo = this._fetchInfo.bind(this);
-    this._refreshToken = this._refreshToken.bind(this);
 
     this.authenticated = new Promise((resolve, reject) => {
       this._authenticatedResolver = resolve;
       this._authenticatedRejecter = reject;
     });
+    this._fetchInfo().then((authInfo) => {
+      this.accessToken = authInfo.access_token;
+      this.refreshToken = authInfo.refresh_token;
+      this.idToken = authInfo.id_token;
+      this.somtodayApiUrl = authInfo.somtoday_api_url;
 
-    this._fetchInfo().then((userInfo) => {
-      this.id = userInfo.links[0].id;
-      this.uuid = userInfo.UUID;
-      this.pupilNumber = userInfo.leerlingnummer;
-      this.firstName = userInfo.roepnaam;
-      this.lastName = userInfo.achternaam;
-      this.email = userInfo.email;
-      this.mobileNumber = userInfo.mobielNummer;
-      this.birthDate = new Date(userInfo.geboortedatum);
-      this.gender = userInfo.geslacht;
       this._authenticatedResolver(this);
     });
-    // .catch(e => {
-    //   // if (e instanceof InvalidTokenError) {
-    //   //   log("Unable to refresh token, please make sure you are using the correct token.")
-    //   //   throw new InvalidTokenError();
-    //   // }
-    // });
+    this._refreshToken = this._refreshToken.bind(this);
   }
-
-  async getGrades(): Promise<Array<Grade>> {
-    const grades: Array<Grade> = [];
-
-    let i = 0;
-    let j = 99;
-
-    // do this until there are no more grades
-    for (;;) {
-      const data: api_cijfer = await this.call({
-        method: "get",
-        url: `/resultaten/huidigVoorLeerling/${this.id}`,
-        headers: {
-          range: `items=${i}-${j}`,
-        },
-      });
-
-      i += 100;
-      j += 100;
-
-      const { items } = data;
-      items.forEach((grade) => {
-        const { vak } = grade;
-        const course = new Course(vak.links[0].id, vak.afkorting, vak.naam);
-
-        grades.push(
-          new Grade(
-            grade.links[0].id,
-            grade.resultaat,
-            grade.resultaatLabel,
-            grade.type,
-            grade.omschrijving,
-            grade.leerjaar,
-            grade.periode,
-            grade.weging,
-            grade.examenWeging,
-            grade.toetsNietGemaakt,
-            grade.teltNietmee,
-            grade.isExamendossierResultaat,
-            grade.isVoortgangsdossierResultaat,
-            new Date(grade.datumInvoer),
-            course,
-          ),
-        );
-      });
-
-      if (data.items.length < 100) break;
-    }
-
-    grades.sort((a, b) => a.dateOfEntry.getTime() - b.dateOfEntry.getTime());
-    return grades;
+  get student(): Student {
+    return new Student(this.somtodayApiUrl, this.accessToken);
   }
-
-  private async _fetchInfo() {
-    log("Fetching user info");
-
-    return this.call({
-      method: "get",
-      url: "/leerlingen",
-    }).then((data: api_leerling) => {
-      const userInfo = data.items[0];
-      return userInfo;
-    });
-  }
-
   private async _refreshToken(refreshToken: string): Promise<boolean | void> {
     log("Token expired");
     log("Refreshing user token");
@@ -168,6 +96,13 @@ class User extends baseApiClass {
           this._authenticatedRejecter(new InvalidTokenError());
         }
       });
+  }
+
+  private async _fetchInfo(): Promise<api_auth_item> {
+    log("Fetching auth info");
+    return this.call().then((data: api_auth_item) => {
+      return data;
+    });
   }
 }
 

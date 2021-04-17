@@ -1,17 +1,22 @@
 import Course from "./course";
+import {
+  api_cijfer_resultaatLabel,
+  api_cijfer_type,
+} from "./somtoday_api_types";
 
-class Grade {
+export default class Grade {
   constructor(
     public id: number,
-    public grade: string,
-    public type: string,
-    public description: string,
+    public grade: string | undefined,
+    public gradeLabel: api_cijfer_resultaatLabel | undefined,
+    public type: api_cijfer_type,
+    public description: string | undefined,
 
     public year: number,
     public period: number,
 
-    public weight: number,
-    public examWeight: number,
+    public weight: number | undefined,
+    public examWeight: number | undefined,
 
     public testNotMade: boolean,
     public doesNotCount: boolean,
@@ -23,5 +28,3 @@ class Grade {
     public course: Course,
   ) {}
 }
-
-export default Grade;

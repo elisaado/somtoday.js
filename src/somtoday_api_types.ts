@@ -33,6 +33,7 @@ export interface api_leerling_item {
   roepnaam: string;
   achternaam: string;
   email: string;
+  mobielNummer: string; // TODO: is this real?
   geboortedatum: string; //"yyyy-mm-dd";
   geslacht: geslacht;
 }
@@ -41,17 +42,22 @@ export interface api_cijfer_item {
   links: Array<api_link>;
   permissions: Array<api_permission>;
   additionalObjects: any;
-  herkansingstype: string; //TODO: more here "Geen"
-  resultaat: string; // string representation of an integer
-  geldendResultaat: string; // string representation of an integer
+  herkansingstype: api_cijfer_herkansingstype; //TODO: more here "Geen"
+  resultaat?: string; // string representation of an integer
+  geldendResultaat?: string; // string representation of an integer
   datumInvoer: string; //ISO-8601 like "2020-09-24T21:03:16.992+02:00"
   teltNietmee: boolean;
   toetsNietGemaakt: boolean;
   leerjaar: number;
   periode: number;
+  weging?: number;
+  examenWeging?: number;
+  resultaatLabel?: api_cijfer_resultaatLabel;
+  resultaatLabelAfkorting?: api_cijfer_resultaatLabelAfkorting;
   isExamendossierResultaat: boolean;
   isVoortgangsdossierResultaat: boolean;
-  type: api_grade_type;
+  type: api_cijfer_type;
+  omschrijving?: string;
   vak: api_vak_item;
   leerling: api_leerling_item;
 }
@@ -264,8 +270,28 @@ export enum geslacht {
   "Vrouw",
   // Meer?
 }
-export enum api_grade_type {
+export enum api_cijfer_type {
+  "Toetskolom",
   "PeriodeGemiddeldeKolom",
+  "RapportGemiddeldeKolom",
+}
+export enum api_cijfer_herkansingstype {
+  "Geen",
+  "EenKeerLaatste",
+}
+export enum api_cijfer_resultaatLabel {
+  "exelent",
+  "goed",
+  "voldoende",
+  "matig",
+  "onvoldoende",
+}
+export enum api_cijfer_resultaatLabelAfkorting {
+  "E",
+  "G",
+  "V",
+  "M",
+  "O",
 }
 export enum api_huiswerkType {
   "HUISWERK",

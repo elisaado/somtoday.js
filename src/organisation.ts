@@ -1,6 +1,6 @@
 import axios from "axios";
 import User from "./user";
-import { APP_ID, APP_SECRET } from "./constants";
+import { APP_ID, APP_SECRET, BASE64_AUTH } from "./constants";
 import qs = require("qs");
 
 interface Credentials {
@@ -29,14 +29,11 @@ class Organization {
       username: `${this.uuid}\\${credentials.username}`,
       password: credentials.password,
       scope: "openid",
+      client_id: APP_ID,
     };
 
     return axios
       .post("https://production.somtoday.nl/oauth2/token", qs.stringify(body), {
-        auth: {
-          username: APP_ID,
-          password: APP_SECRET,
-        },
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },

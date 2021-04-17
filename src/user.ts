@@ -7,30 +7,21 @@ import Grade from "./grade";
 import Course from "./course";
 
 import qs = require("qs");
+import baseApiClass from "./baseApiClass";
+import { api_cijfer, api_leerling, geslacht } from "./somtoday_api_types";
 
 const log = Debug("user");
 
-// currently all methods we need
-type Methods = "get" | "post";
-
-interface CallParams {
-  method: Methods;
-  url: string;
-  data?: object;
-  headers?: any;
-  auth?: AxiosBasicCredentials;
-}
-
-class User extends EventEmitter {
+class User extends baseApiClass {
   public id!: number;
   public uuid!: string;
   public pupilNumber!: number;
   public firstName!: string;
   public lastName!: string;
   public email!: string;
-  public mobileNumber!: string;
+  public mobileNumber?: string;
   public birthDate!: Date;
-  public gender!: string;
+  public gender!: geslacht;
 
   public authenticated: Promise<User>;
 
@@ -43,12 +34,14 @@ class User extends EventEmitter {
     public idToken: string,
     public somtodayApiUrl: string,
   ) {
-    super();
+    super({
+      baseURL: `${somtodayApiUrl}/rest/v1`,
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
 
     log("Initializing user");
     this._fetchInfo = this._fetchInfo.bind(this);
     this._refreshToken = this._refreshToken.bind(this);
-    this._call = this._call.bind(this);
 
     this.authenticated = new Promise((resolve, reject) => {
       this._authenticatedResolver = resolve;
@@ -83,7 +76,7 @@ class User extends EventEmitter {
 
     // do this until there are no more grades
     for (;;) {
-      const { data } = await this._call({
+      const data: api_cijfer = await this.call({
         method: "get",
         url: `/resultaten/huidigVoorLeerling/${this.id}`,
         headers: {
@@ -95,15 +88,15 @@ class User extends EventEmitter {
       j += 100;
 
       const { items } = data;
-      items.forEach((grade: any) => {
+      items.forEach((grade) => {
         const { vak } = grade;
         const course = new Course(vak.links[0].id, vak.afkorting, vak.naam);
-        if (!grade.resultaat) grade.resultaat = grade.resultaatLabelAfkorting;
 
         grades.push(
           new Grade(
             grade.links[0].id,
             grade.resultaat,
+            grade.resultaatLabel,
             grade.type,
             grade.omschrijving,
             grade.leerjaar,
@@ -130,13 +123,11 @@ class User extends EventEmitter {
   private async _fetchInfo() {
     log("Fetching user info");
 
-    return this._call({
+    return this.call({
       method: "get",
       url: "/leerlingen",
-    }).then((infoResponse) => {
-      const { data } = infoResponse;
+    }).then((data: api_leerling) => {
       const userInfo = data.items[0];
-
       return userInfo;
     });
   }
@@ -147,15 +138,11 @@ class User extends EventEmitter {
     const body = {
       grant_type: "refresh_token",
       refresh_token: refreshToken,
-      scope: "openid",
+      client_id: APP_ID,
     };
 
     return axios
       .post("https://production.somtoday.nl/oauth2/token", qs.stringify(body), {
-        auth: {
-          username: APP_ID,
-          password: APP_SECRET,
-        },
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
@@ -165,7 +152,7 @@ class User extends EventEmitter {
         this.accessToken = data.access_token;
         this.refreshToken = data.refresh_token;
         this.idToken = data.id_token;
-        this.emit("token_refreshed");
+        //this.emit("token_refreshed");
 
         return true;
       })
@@ -181,35 +168,6 @@ class User extends EventEmitter {
           this._authenticatedRejecter(new InvalidTokenError());
         }
       });
-  }
-
-  private async _call(callParams: CallParams): Promise<any> {
-    log(`a call has been made to ${callParams.url}`);
-
-    // to prevent assigning to parametres
-    const params = Object.create(callParams);
-    if (!params.headers) params.headers = {};
-    if (!params.headers.Authorization) {
-      params.headers.Authorization = `Bearer ${this.accessToken}`;
-    }
-
-    return axios({
-      method: params.method,
-      url: params.url,
-      data: params.data,
-      headers: params.headers,
-      auth: params.auth,
-      baseURL: `${this.somtodayApiUrl}/rest/v1`,
-    }).catch((e) => {
-      if (e.response.status === 401 && !e.response.data) {
-        return this._refreshToken(this.refreshToken).then((status) => {
-          if (!status) throw new InvalidTokenError();
-          return this._call(callParams);
-        });
-      }
-
-      throw e;
-    });
   }
 }
 

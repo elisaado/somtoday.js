@@ -1,7 +1,6 @@
-import Course from './course';
+import Course from "./course";
 
 class Grade {
-
   constructor(
     public id: number,
     public grade: string,
@@ -22,8 +21,7 @@ class Grade {
     public dateOfEntry: Date,
 
     public course: Course,
-  ) { }
-
+  ) {}
 }
 
 export default Grade;

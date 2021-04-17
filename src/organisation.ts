@@ -1,16 +1,14 @@
-import axios from 'axios';
-import User from './user';
-import { APP_ID, APP_SECRET } from './constants';
-
-import qs = require('qs');
+import axios from "axios";
+import User from "./user";
+import { APP_ID, APP_SECRET } from "./constants";
+import qs = require("qs");
 
 interface Credentials {
-  username: string,
-  password: string
+  username: string;
+  password: string;
 }
 
-class Organisation {
-
+class Organization {
   constructor(
     public uuid: string,
     public name: string,
@@ -21,35 +19,38 @@ class Organisation {
 
   async authenticate(credentials: Credentials) {
     if (credentials.username.trim().length === 0) {
-      throw new Error('No username provided');
+      throw new Error("No username provided");
     } else if (credentials.password.trim().length === 0) {
-      throw new Error('No password provided');
+      throw new Error("No password provided");
     }
 
     const body = {
-      grant_type: 'password',
+      grant_type: "password",
       username: `${this.uuid}\\${credentials.username}`,
       password: credentials.password,
-      scope: 'openid',
+      scope: "openid",
     };
 
-    return axios.post('https://production.somtoday.nl/oauth2/token', qs.stringify(body), {
-      auth: {
-        username: APP_ID,
-        password: APP_SECRET,
-      },
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-    })
-      .then(authResponse => {
+    return axios
+      .post("https://production.somtoday.nl/oauth2/token", qs.stringify(body), {
+        auth: {
+          username: APP_ID,
+          password: APP_SECRET,
+        },
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      })
+      .then((authResponse) => {
         const { data } = authResponse;
-        return new User(data.access_token,
-          data.refresh_token, data.id_token,
-          data.somtoday_api_url);
+        return new User(
+          data.access_token,
+          data.refresh_token,
+          data.id_token,
+          data.somtoday_api_url,
+        );
       });
   }
-
 }
 
-export { Organisation as default };
+export { Organization as default };

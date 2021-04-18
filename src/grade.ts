@@ -1,54 +1,105 @@
+import baseApiClass from "./baseApiClass";
 import Course from "./course";
 import {
+  api_cijfer,
   api_cijfer_item,
   api_cijfer_resultaatLabel,
   api_cijfer_type,
 } from "./somtoday_api_types";
+import Student from "./student";
+import User from "./user";
 
-export default class Grade {
-  public id: number;
+export default class Grade extends baseApiClass {
+  public id!: number;
+  public href!: string;
   public grade: string | undefined;
   public gradeLabel: api_cijfer_resultaatLabel | undefined;
-  public type: api_cijfer_type;
+  public type!: api_cijfer_type;
   public description: string | undefined;
 
-  public year: number;
-  public period: number;
+  public year!: number;
+  public period!: number;
 
   public weight: number | undefined;
   public examWeight: number | undefined;
 
-  public testNotMade: boolean;
-  public doesNotCount: boolean;
-  public countsForExamFile: boolean;
-  public countsForProgressFile: boolean;
+  public testNotMade?: boolean;
+  public doesNotCount?: boolean;
+  public countsForExamFile?: boolean;
+  public countsForProgressFile?: boolean;
 
-  public dateOfEntry: Date;
-  constructor(public raw: api_cijfer_item) {
-    this.id = raw.links[0].id;
-    this.grade = raw.resultaat;
-    this.gradeLabel = raw.resultaatLabel;
-    this.type = raw.type;
-    this.description = raw.omschrijving;
-    this.year = raw.leerjaar;
-    this.period = raw.periode;
-    this.weight = raw.weging;
-    this.examWeight = raw.examenWeging;
-    this.testNotMade = raw.toetsNietGemaakt;
-    this.doesNotCount = raw.teltNietmee;
-    this.countsForExamFile = raw.isExamendossierResultaat;
-    this.countsForProgressFile = raw.isVoortgangsdossierResultaat;
-    this.dateOfEntry = new Date(raw.datumInvoer);
+  public dateOfEntry!: Date;
 
-    this.raw = raw;
+  public raw!: api_cijfer_item;
+  public fetched: Promise<Grade>;
+  private _fetchedResolver!: (value: Grade | PromiseLike<Grade>) => void;
+  private _fetchedRejecter!: (value?: Error | PromiseLike<Error>) => void;
+  constructor(
+    private _user: User,
+    private _gradePartial: {
+      raw?: api_cijfer_item;
+      id?: number;
+      href?: string;
+    },
+  ) {
+    super({
+      baseURL: `${_user.baseURL}`,
+      method: "GET",
+    });
+    this.fetched = new Promise((resolve, reject) => {
+      this._fetchedResolver = resolve;
+      this._fetchedRejecter = reject;
+    });
+
+    if (_gradePartial.href) {
+      this.call({
+        baseURL: _gradePartial.href,
+      }).then((response: api_cijfer) => {
+        this._storeGrade(response.items[0]);
+        this._fetchedResolver(this);
+      });
+    } else if (_gradePartial.id) {
+      this.fetchGrade().then(() => {
+        this._fetchedResolver(this);
+      });
+    } else if (_gradePartial.raw) {
+      this._storeGrade(_gradePartial.raw);
+      this._fetchedResolver(this);
+    } else throw new Error("You must supply a grade partial");
   }
-  get course() {
+  get course(): Course {
     const { vak } = this.raw;
     const course = new Course(vak);
     return course;
   }
-  get student() {
+  get student(): Student {
     const { leerling } = this.raw;
-    return;
+    return new Student(this._user, { raw: leerling });
+  }
+  async fetchGrade(): Promise<Grade> {
+    return this.call({
+      url: `/resultaten/${this.id}`,
+    }).then((response: api_cijfer) => {
+      return this._storeGrade(response.items[0]);
+    });
+  }
+  private _storeGrade(gradeInfo: api_cijfer_item): Grade {
+    this.id = gradeInfo.links[0].id;
+    this.href = gradeInfo.links[0].href!;
+    this.grade = gradeInfo.resultaat;
+    this.gradeLabel = gradeInfo.resultaatLabel;
+    this.type = gradeInfo.type;
+    this.description = gradeInfo.omschrijving;
+    this.year = gradeInfo.leerjaar;
+    this.period = gradeInfo.periode;
+    this.weight = gradeInfo.weging;
+    this.examWeight = gradeInfo.examenWeging;
+    this.testNotMade = gradeInfo.toetsNietGemaakt;
+    this.doesNotCount = gradeInfo.teltNietmee;
+    this.countsForExamFile = gradeInfo.isExamendossierResultaat;
+    this.countsForProgressFile = gradeInfo.isVoortgangsdossierResultaat;
+    this.dateOfEntry = new Date(gradeInfo.datumInvoer);
+    this.raw = gradeInfo;
+    return this;
   }
 }

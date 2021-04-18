@@ -24,6 +24,7 @@ class User extends baseApiClass {
   public refreshToken!: string;
   public idToken!: string;
   public somtodayApiUrl!: string;
+  public baseURL!: string;
 
   public authenticated: Promise<User>;
   private _authenticatedResolver!: (value: User | PromiseLike<User>) => void;
@@ -35,10 +36,13 @@ class User extends baseApiClass {
       baseURL: `https://production.somtoday.nl/oauth2/token`,
       data: {
         grant_type: "password",
-        username: `${credentials.username}`,
+        username: `${credentials.organization}\\${credentials.username}`,
         password: credentials.password,
         scope: "openid",
         client_id: APP_ID,
+      },
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
       },
     });
     log("Initializing user");
@@ -48,17 +52,27 @@ class User extends baseApiClass {
       this._authenticatedRejecter = reject;
     });
     this._fetchInfo().then((authInfo) => {
-      this.accessToken = authInfo.access_token;
-      this.refreshToken = authInfo.refresh_token;
-      this.idToken = authInfo.id_token;
-      this.somtodayApiUrl = authInfo.somtoday_api_url;
-
+      this._storeInfo(authInfo);
       this._authenticatedResolver(this);
     });
     this._refreshToken = this._refreshToken.bind(this);
   }
-  get student(): Student {
-    return new Student(this.somtodayApiUrl, this.accessToken);
+  async getStudents(): Promise<Array<Student>> {
+    const rawStudents: api_leerling = await this.call(
+      {
+        method: "get",
+        url: `/leerlingen`,
+        baseURL: `${this.somtodayApiUrl}/rest/v1`,
+        headers: { Authorization: `Bearer ${this.accessToken}` },
+      },
+      true,
+    );
+    const { items } = rawStudents;
+    return items.map((rawStudent) => {
+      return new Student(this, {
+        raw: rawStudent,
+      });
+    });
   }
   private async _refreshToken(refreshToken: string): Promise<boolean | void> {
     log("Token expired");
@@ -92,17 +106,24 @@ class User extends baseApiClass {
               "Access denied by resource owner or authorization server: Unauthorized account")
         ) {
           log("Unable to refresh token");
-          // todo: make this better
+          // TODO: make this better
           this._authenticatedRejecter(new InvalidTokenError());
         }
       });
   }
-
   private async _fetchInfo(): Promise<api_auth_item> {
     log("Fetching auth info");
     return this.call().then((data: api_auth_item) => {
       return data;
     });
+  }
+  private _storeInfo(authInfo: api_auth_item): User {
+    this.accessToken = authInfo.access_token;
+    this.refreshToken = authInfo.refresh_token;
+    this.idToken = authInfo.id_token;
+    this.somtodayApiUrl = authInfo.somtoday_api_url;
+    this.baseURL = `${authInfo.somtoday_api_url}/rest/v1`;
+    return this;
   }
 }
 

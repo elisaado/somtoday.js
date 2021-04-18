@@ -75,8 +75,8 @@ export default class Appointment extends baseApiClass {
   async fetchAppointment(): Promise<Appointment> {
     return this.call({
       url: `/afspraken/${this.id}`,
-    }).then((response: api_afspraken) => {
-      return this._storeAppointment(response.items[0]);
+    }).then((response: api_afspraken_item) => {
+      return this._storeAppointment(response);
     });
   }
   _storeAppointment(appointmentData: api_afspraken_item): Appointment {

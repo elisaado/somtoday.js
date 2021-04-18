@@ -103,8 +103,10 @@ class Student extends baseApiClass {
         this.href ? this.href : `/leerlingen${this.id ? `/${this.id}` : ""}`
       }`,
     })
-      .then((data: api_leerling) => {
-        const userInfo = data.items[0];
+      .then((data: any) => {
+        let userInfo;
+        if (data.items) userInfo = data.items[0];
+        else userInfo = data;
         return userInfo;
       })
       .then((studentInfo) => {

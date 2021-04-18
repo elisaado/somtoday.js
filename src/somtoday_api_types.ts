@@ -84,7 +84,11 @@ export interface api_afspraken_item {
   $type: "participatie.RAfspraak";
   links: Array<api_link>;
   permissions: Array<api_permission>;
-  additionalObjects: any;
+  additionalObjects: {
+    vak?: api_vak_item | null;
+    docentAfkortingen?: string;
+    leerlingen?: api_leerling;
+  };
   afspraakType: api_afspraken_item_type;
   beginDatumTijd: string; // ISO-8601 "2018-01-31T12:35:00.000+01:00";
   eindDatumTijd: string; // ISO-8601  "2018-01-31T13:25:00.000+01:00";

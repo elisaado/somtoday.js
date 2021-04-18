@@ -79,8 +79,8 @@ export default class Grade extends baseApiClass {
   async fetchGrade(): Promise<Grade> {
     return this.call({
       url: `/resultaten/${this.id}`,
-    }).then((response: api_cijfer) => {
-      return this._storeGrade(response.items[0]);
+    }).then((response: api_cijfer_item) => {
+      return this._storeGrade(response);
     });
   }
   private _storeGrade(gradeInfo: api_cijfer_item): Grade {

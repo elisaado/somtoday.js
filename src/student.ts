@@ -29,7 +29,7 @@ class Student extends baseApiClass {
   public firstName!: string;
   public lastName!: string;
   public email!: string;
-  public mobileNumber?: string;
+  public mobileNumber?: string | null;
   public birthDate!: Date;
   public gender!: geslacht;
   public raw!: api_leerling_item;

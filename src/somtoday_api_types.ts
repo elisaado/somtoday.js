@@ -94,7 +94,7 @@ export interface api_afspraken_item {
   omschrijving: string;
   presentieRegistratieVerplicht: boolean;
   presentieRegistratieVerwerkt: boolean;
-  afspraakStatus: string; // TODO: are there more of these? "ACTIEF";
+  afspraakStatus: api_afspraken_item_status;
   vestiging: api_vestiging_item;
   bijlagen: Array<api_bijlage_item>;
 }
@@ -112,6 +112,7 @@ export interface api_afspraken_item_type {
   actief: boolean;
   vestiging: api_vestiging_item;
 }
+
 export interface api_vestiging_item {
   links: Array<api_link>;
   permissions: Array<api_permission>;
@@ -310,3 +311,7 @@ export enum api_huiswerkType {
   "TOETS",
   "GROTE_TOETS",
 }
+
+export enum api_afspraken_item_status {
+  "ACTIEF",
+} // TODO: are there more of these?

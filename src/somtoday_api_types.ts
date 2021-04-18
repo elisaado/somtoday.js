@@ -137,9 +137,10 @@ export interface api_uploadContext_item {
   links: Array<api_link>;
   permissions: Array<api_permission>;
   additionalObjects: any;
-  fileState: string; //"ASSEMBLY_COMPLETED";
+  fileState: api_uploadContext_item_fileState; //"ASSEMBLY_COMPLETED";
   assemblyId: string; //"eb166b7581284ce6b1f96a8fe40e88af";
 }
+
 export interface api_assemblyResults_item {
   links: Array<api_link>;
   permissions: Array<api_permission>;
@@ -315,7 +316,9 @@ export enum api_huiswerkType {
   "TOETS",
   "GROTE_TOETS",
 }
-
 export enum api_afspraken_item_status {
   "ACTIEF",
 } // TODO: are there more of these?
+export enum api_uploadContext_item_fileState {
+  "ASSEMBLY_COMPLETED", //TODO: is there more?
+}

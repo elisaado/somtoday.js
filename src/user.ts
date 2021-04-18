@@ -1,6 +1,6 @@
 import { EventEmitter } from "events";
 import Debug from "debug";
-import axios, { AxiosBasicCredentials } from "axios";
+import axios, { AxiosBasicCredentials, AxiosRequestConfig } from "axios";
 import { APP_ID, APP_SECRET } from "./constants";
 import { InvalidTokenError } from "./errors";
 import Grade from "./grade";
@@ -19,7 +19,7 @@ import { Credentials } from "./organisation";
 
 const log = Debug("user");
 
-class User extends baseApiClass {
+class User {
   public accessToken!: string;
   public refreshToken!: string;
   public idToken!: string;
@@ -29,9 +29,10 @@ class User extends baseApiClass {
   public authenticated: Promise<User>;
   private _authenticatedResolver!: (value: User | PromiseLike<User>) => void;
   private _authenticatedRejecter!: (value?: Error | PromiseLike<Error>) => void;
-
+  private _requestInfo: AxiosRequestConfig;
   constructor(credentials: Credentials) {
-    super({
+    log("Initializing user");
+    this._requestInfo = {
       method: "POST",
       baseURL: `https://production.somtoday.nl/oauth2/token`,
       data: {
@@ -44,29 +45,26 @@ class User extends baseApiClass {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
       },
-    });
-    log("Initializing user");
-
+    };
     this.authenticated = new Promise((resolve, reject) => {
       this._authenticatedResolver = resolve;
       this._authenticatedRejecter = reject;
     });
-    this._fetchInfo().then((authInfo) => {
-      this._storeInfo(authInfo);
-      this._authenticatedResolver(this);
+    this._fetchInfo().then((user) => {
+      this._authenticatedResolver(user);
     });
     this._refreshToken = this._refreshToken.bind(this);
   }
   async getStudents(): Promise<Array<Student>> {
-    const rawStudents: api_leerling = await this.call(
-      {
+    const rawStudents: api_leerling = await axios
+      .request({
         method: "get",
         url: `/leerlingen`,
         baseURL: `${this.somtodayApiUrl}/rest/v1`,
         headers: { Authorization: `Bearer ${this.accessToken}` },
-      },
-      true,
-    );
+      })
+      .then((res) => res.data);
+
     const { items } = rawStudents;
     return items.map((rawStudent) => {
       return new Student(this, {
@@ -111,11 +109,14 @@ class User extends baseApiClass {
         }
       });
   }
-  private async _fetchInfo(): Promise<api_auth_item> {
+  private async _fetchInfo(): Promise<User> {
     log("Fetching auth info");
-    return this.call().then((data: api_auth_item) => {
-      return data;
-    });
+    return axios
+      .request(this._requestInfo)
+      .then((res) => res.data)
+      .then((data: api_auth_item) => {
+        return this._storeInfo(data);
+      });
   }
   private _storeInfo(authInfo: api_auth_item): User {
     this.accessToken = authInfo.access_token;

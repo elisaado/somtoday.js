@@ -1,4 +1,6 @@
 import baseApiClass from "./baseApiClass";
+import Course from "./course";
+import Establishment from "./establishment";
 import {
   api_afspraken,
   api_afspraken_item,
@@ -6,6 +8,7 @@ import {
   api_afspraken_item_type,
   api_vestiging_item,
 } from "./somtoday_api_types";
+import Student from "./student";
 import User from "./user";
 
 export default class Appointment extends baseApiClass {
@@ -26,8 +29,13 @@ export default class Appointment extends baseApiClass {
 
   public appointmentStatus!: api_afspraken_item_status;
 
-  public establishment: any; // TODO: make this a class
+  public teacherAbbreviation?: string;
+  public students?: Array<Student>;
+  public course?: Course;
+
+  public establishment!: Establishment; // TODO: make this a class
   public attachments: any; // TODO: make this a class
+
   public fetched: Promise<Appointment>;
   private _fetchedResolver!: (
     value: Appointment | PromiseLike<Appointment>,
@@ -41,7 +49,7 @@ export default class Appointment extends baseApiClass {
       raw?: api_afspraken_item;
     },
   ) {
-    super({
+    super(_user, {
       method: "get",
       baseURL: _user.baseURL,
       headers: {
@@ -94,8 +102,30 @@ export default class Appointment extends baseApiClass {
     this.attendanceRegistrationProcessed =
       appointmentData.presentieRegistratieVerwerkt;
     this.appointmentStatus = appointmentData.afspraakStatus;
-    this.establishment = appointmentData; // TODO: make this a class
+    this.establishment = new Establishment(this._user, {
+      raw: appointmentData.vestiging,
+    }); // TODO: make this a class
+
     this.attachments = appointmentData; // TODO: make this a class
+
+    this.teacherAbbreviation =
+      appointmentData.additionalObjects.docentAfkortingen;
+    if (appointmentData.additionalObjects.vak) {
+      const course = new Course(this._user, {
+        raw: appointmentData.additionalObjects.vak,
+      });
+      this.course = course;
+    }
+    if (appointmentData.additionalObjects.leerlingen) {
+      this.students = appointmentData.additionalObjects.leerlingen?.items.map(
+        (student) => {
+          return new Student(this._user, {
+            raw: student,
+          });
+        },
+      );
+    }
+
     return this;
   }
 }

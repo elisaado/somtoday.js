@@ -20,7 +20,7 @@ export default class Establishment extends baseApiClass {
       raw?: api_vestiging_item;
     },
   ) {
-    super({
+    super(_user, {
       method: "GET",
       baseURL: _user.baseURL,
     });

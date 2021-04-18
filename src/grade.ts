@@ -69,7 +69,7 @@ export default class Grade extends baseApiClass {
   }
   get course(): Course {
     const { vak } = this.raw;
-    const course = new Course(vak);
+    const course = new Course(this._user, { raw: vak });
     return course;
   }
   get student(): Student {

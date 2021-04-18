@@ -1,10 +1,11 @@
 import axios, { AxiosRequestConfig, Method } from "axios";
 import qs = require("qs");
+import User from "./user";
 
 export default class baseApiClass {
   public axiosOptions: AxiosRequestConfig;
 
-  constructor(options?: AxiosRequestConfig) {
+  constructor(private __user: User, options?: AxiosRequestConfig) {
     this.axiosOptions = options || {};
   }
   /**

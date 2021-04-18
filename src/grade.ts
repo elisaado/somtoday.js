@@ -42,7 +42,7 @@ export default class Grade extends baseApiClass {
       href?: string;
     },
   ) {
-    super({
+    super(_user, {
       baseURL: `${_user.baseURL}`,
       method: "GET",
     });

@@ -36,16 +36,16 @@ export type api_organisaties = [{ instellingen: Array<api_organisaties_item> }];
 
 // Items
 export interface api_leerling_item {
-  $type: "leerling.RLeerling"; // TODO: More here?;
+  $type: "leerling.RLeerling";
   links: Array<api_link>;
   permissions: Array<api_permission>;
-  additionalObjects: any; // TODO: what is this;
+  additionalObjects: any;
   UUID: api_UUID; // Like this: "ab123acd-abc1-1cba-blah-asd3a2df2sdf";
   leerlingnummer: number;
   roepnaam: string;
   achternaam: string;
   email: string;
-  mobielNummer: string; // TODO: is this real?
+  mobielNummer: string | null;
   geboortedatum: string; //"yyyy-mm-dd";
   geslacht: geslacht;
 }
@@ -54,7 +54,7 @@ export interface api_cijfer_item {
   links: Array<api_link>;
   permissions: Array<api_permission>;
   additionalObjects: any;
-  herkansingstype: api_cijfer_herkansingstype; //TODO: more here "Geen"
+  herkansingstype: api_cijfer_herkansingstype;
   resultaat?: string; // string representation of an integer
   geldendResultaat?: string; // string representation of an integer
   datumInvoer: string; //ISO-8601 like "2020-09-24T21:03:16.992+02:00"

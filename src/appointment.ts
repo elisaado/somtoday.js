@@ -7,6 +7,7 @@ import {
   api_afspraken_item,
   api_afspraken_item_status,
   api_afspraken_item_type,
+  api_vak_item,
   api_vestiging_item,
 } from "./somtoday_api_types";
 import Student from "./student";
@@ -19,7 +20,7 @@ export default class Appointment extends baseApiClass {
 
   public startDateTime!: Date;
   public endDateTime!: Date;
-  public startLessonHour!: number; // TODO: translate this
+  public startLessonHour!: number;
   public endLessonHour!: number;
 
   public title!: string;
@@ -32,10 +33,10 @@ export default class Appointment extends baseApiClass {
 
   public teacherAbbreviation?: string;
   public students?: Array<Student>;
-  public course?: Course;
+  public raw_course?: api_vak_item;
 
-  public establishment!: Establishment; // TODO: make this a class
-  public attachments!: Array<Attachment>; // TODO: make this a class
+  public establishment!: Establishment;
+  public attachments!: Array<Attachment>;
 
   public fetched: Promise<Appointment>;
   private _fetchedResolver!: (
@@ -107,19 +108,16 @@ export default class Appointment extends baseApiClass {
     this.appointmentStatus = appointmentData.afspraakStatus;
     this.establishment = new Establishment(this._user, {
       raw: appointmentData.vestiging,
-    }); // TODO: make this a class
+    });
 
     this.attachments = appointmentData.bijlagen.map(
       (attachment) => new Attachment(this._user, { raw: attachment }),
-    ); // TODO: make this a class
+    );
 
     this.teacherAbbreviation =
       appointmentData.additionalObjects.docentAfkortingen;
     if (appointmentData.additionalObjects.vak) {
-      const course = new Course(this._user, {
-        raw: appointmentData.additionalObjects.vak,
-      });
-      this.course = course;
+      this.raw_course = appointmentData.additionalObjects.vak;
     }
     if (appointmentData.additionalObjects.leerlingen) {
       this.students = appointmentData.additionalObjects.leerlingen?.items.map(
@@ -132,6 +130,16 @@ export default class Appointment extends baseApiClass {
     }
 
     return this;
+  }
+
+  get course(): Course | undefined {
+    if (this.raw_course) {
+      return new Course(this._user, {
+        raw: this.raw_course,
+      });
+    } else {
+      return undefined;
+    }
   }
 }
 
@@ -164,7 +172,9 @@ export class AppointmentType extends baseApiClass {
     });
   }
   public fetchAppointmentType(): Promise<AppointmentType> {
-    return this.call();
+    return this.call().then((raw: api_afspraken_item_type) =>
+      this._storeAppointmentType(raw),
+    );
   }
 
   private _storeAppointmentType(raw: api_afspraken_item_type): AppointmentType {

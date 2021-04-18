@@ -9,6 +9,7 @@ import Course from "./course";
 import qs = require("qs");
 import baseApiClass from "./baseApiClass";
 import {
+  api_afspraken,
   api_auth_item,
   api_cijfer,
   api_leerling,
@@ -16,6 +17,8 @@ import {
 } from "./somtoday_api_types";
 import Student from "./student";
 import { Credentials } from "./organisation";
+import Appointment from "./appointment";
+import { URLSearchParams } from "url";
 
 const log = Debug("user");
 
@@ -35,13 +38,13 @@ class User {
     this._requestInfo = {
       method: "POST",
       baseURL: `https://production.somtoday.nl/oauth2/token`,
-      data: {
+      data: qs.stringify({
         grant_type: "password",
         username: `${credentials.organization}\\${credentials.username}`,
         password: credentials.password,
         scope: "openid",
         client_id: APP_ID,
-      },
+      }),
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
       },
@@ -71,6 +74,71 @@ class User {
         raw: rawStudent,
       });
     });
+  }
+  async getAppointments(
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<Array<Appointment>> {
+    const appointments: Array<Appointment> = [];
+    let start_date =
+      startDate || new Date(Date.now() - 6 * 366 * 24 * 60 * 60 * 1000);
+    const end_date =
+      endDate || new Date(Date.now() + 6 * 366 * 24 * 60 * 60 * 1000);
+    // do this until there are no more grades
+    console.time("appointments");
+    for (;;) {
+      // TODO: improve speeeeeds
+      //  to improve speeds make it make a bunch of promises for like a week or two
+      //  and then fetch those at the same time and then remove duplicates and fetch
+      //  things that are missing
+
+      const start_date_string = start_date.toISOString().split("T")[0];
+      console.timeLog("appointments", start_date_string);
+      const params = new URLSearchParams();
+      params.append("additional", "vak");
+      params.append("additional", "docentAfkortingen");
+      params.append("additional", "leerlingen");
+      params.append("begindatum", start_date_string);
+      params.append("einddatum", `${end_date.toISOString().split("T")[0]}`);
+      const res = await axios.request({
+        method: "get",
+        baseURL: `${this.somtodayApiUrl}/rest/v1`,
+        headers: { Authorization: `Bearer ${this.accessToken}` },
+        url: `/afspraken`,
+        params: params,
+      });
+      console.timeLog("appointments", start_date_string + " after request");
+      const data: api_afspraken = res.data;
+      const { items } = data;
+      items.forEach((appointment) => {
+        const newAppointment = new Appointment(this, {
+          raw: appointment,
+        });
+        appointments.push(newAppointment);
+        if (newAppointment.startDateTime.valueOf() > start_date.valueOf()) {
+          start_date = newAppointment.startDateTime;
+        }
+        start_date = new Date(start_date.valueOf() - 50 * 60 * 60 * 1000);
+      });
+
+      if (data.items.length < 100) break;
+    }
+    console.timeEnd("appointments");
+    console.time("sort");
+    const filtered_appointments = appointments.filter(
+      (appointment, index, array) => {
+        if (array.filter((find) => find.id === appointment.id)?.length > 1) {
+          return false;
+        }
+        return true;
+      },
+    );
+
+    filtered_appointments.sort(
+      (a, b) => b.startDateTime.valueOf() - a.startDateTime.valueOf(),
+    );
+    console.timeEnd("sort");
+    return filtered_appointments;
   }
   public async refreshRefreshToken(
     refreshToken?: string,

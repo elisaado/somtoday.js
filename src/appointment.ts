@@ -15,7 +15,7 @@ import User from "./user";
 export default class Appointment extends baseApiClass {
   public id!: number;
   public href!: string;
-  public appointmentType!: api_afspraken_item_type;
+  public appointmentType!: AppointmentType;
 
   public startDateTime!: Date;
   public endDateTime!: Date;
@@ -91,7 +91,9 @@ export default class Appointment extends baseApiClass {
   _storeAppointment(appointmentData: api_afspraken_item): Appointment {
     this.id = appointmentData.links[0].id;
     this.href = appointmentData.links[0].href!;
-    this.appointmentType = appointmentData.afspraakType;
+    this.appointmentType = new AppointmentType(this._user, {
+      raw: appointmentData.afspraakType,
+    });
     this.startDateTime = new Date(appointmentData.beginDatumTijd);
     this.endDateTime = new Date(appointmentData.eindDatumTijd);
     this.startLessonHour = appointmentData.beginLesuur;
@@ -130,5 +132,60 @@ export default class Appointment extends baseApiClass {
     }
 
     return this;
+  }
+}
+
+export class AppointmentType extends baseApiClass {
+  public id!: number;
+  public href!: string;
+
+  public name!: string;
+  public description!: string;
+  public defaultColour!: number;
+  public category!: string;
+  public activity!: string;
+
+  public percentageIIVO!: number;
+  public presenceRegistrationDefault!: boolean;
+  public active!: boolean;
+
+  public raw_establishment!: api_vestiging_item;
+  constructor(
+    private _user: User,
+    private _AppointmentType: {
+      id?: number;
+      href?: string;
+      raw?: api_afspraken_item_type;
+    },
+  ) {
+    super(_user, {
+      method: "get",
+      baseURL: _user.baseURL,
+    });
+  }
+  public fetchAppointmentType(): Promise<AppointmentType> {
+    return this.call();
+  }
+
+  private _storeAppointmentType(raw: api_afspraken_item_type): AppointmentType {
+    this.id = raw.links[0].id;
+    this.href = raw.links[0].href!;
+
+    this.name = raw.naam;
+    this.description = raw.omschrijving;
+    this.defaultColour = raw.standaardKleur;
+    this.category = raw.categorie;
+    this.activity = raw.activiteit;
+
+    this.percentageIIVO = raw.percentageIIVO;
+    this.presenceRegistrationDefault = raw.presentieRegistratieDefault;
+    this.active = raw.actief;
+
+    this.raw_establishment = raw.vestiging;
+    return this;
+  }
+
+  get establishment(): Establishment {
+    return new Establishment(this._user, { raw: this.raw_establishment });
   }
 }

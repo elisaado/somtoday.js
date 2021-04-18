@@ -1,4 +1,4 @@
-import axios, { AxiosRequestConfig, Method } from "axios";
+import axios, { AxiosError, AxiosRequestConfig, Method } from "axios";
 import qs = require("qs");
 import User from "./user";
 
@@ -35,9 +35,28 @@ export default class baseApiClass {
     if (!options?.baseURL && !options?.url)
       throw new Error("No request url provided");
     else if (!options?.method) throw new Error("No request method provided");
+
+    if (
+      Object.keys(options.headers).includes("Authorization") &&
+      options.headers["Authorization"]?.startsWith("Bearer ")
+    ) {
+      options.headers["Authorization"] = "Bearer " + this.__user.accessToken;
+    }
+
     if (options.data) options.data = qs.stringify(options.data);
-    const res = await axios.request(options);
-    const data = res.data;
-    return data;
+    try {
+      const res = await axios.request(options);
+      const data = res.data;
+      return data;
+    } catch (err) {
+      if (err.response.status === 401) {
+        const refreshed = await this.__user.refreshRefreshToken();
+        if (refreshed) {
+          return this.call(optionsParam, overwrite);
+        } else {
+          throw err;
+        }
+      }
+    }
   }
 }

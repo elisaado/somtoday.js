@@ -53,7 +53,7 @@ class User {
     this._fetchInfo().then((user) => {
       this._authenticatedResolver(user);
     });
-    this._refreshToken = this._refreshToken.bind(this);
+    this.refreshRefreshToken = this.refreshRefreshToken.bind(this);
   }
   async getStudents(): Promise<Array<Student>> {
     const rawStudents: api_leerling = await axios
@@ -72,12 +72,14 @@ class User {
       });
     });
   }
-  private async _refreshToken(refreshToken: string): Promise<boolean | void> {
+  public async refreshRefreshToken(
+    refreshToken?: string,
+  ): Promise<boolean | void> {
     log("Token expired");
     log("Refreshing user token");
     const body = {
       grant_type: "refresh_token",
-      refresh_token: refreshToken,
+      refresh_token: refreshToken || this.refreshToken,
       client_id: APP_ID,
     };
 
@@ -92,8 +94,6 @@ class User {
         this.accessToken = data.access_token;
         this.refreshToken = data.refresh_token;
         this.idToken = data.id_token;
-        //this.emit("token_refreshed");
-
         return true;
       })
       .catch((e) => {
@@ -104,8 +104,8 @@ class User {
               "Access denied by resource owner or authorization server: Unauthorized account")
         ) {
           log("Unable to refresh token");
-          // TODO: make this better
-          this._authenticatedRejecter(new InvalidTokenError());
+          console.error(e);
+          return false;
         }
       });
   }

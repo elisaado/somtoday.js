@@ -9,12 +9,15 @@ import Course from "./course";
 import qs = require("qs");
 import baseApiClass from "./baseApiClass";
 import {
+  api_afspraken,
   api_cijfer,
   api_leerling,
   api_leerling_item,
   geslacht,
 } from "./somtoday_api_types";
 import User from "./user";
+import Appointment from "./appointment";
+import { URLSearchParams } from "url";
 
 const log = Debug("student");
 
@@ -38,7 +41,7 @@ class Student extends baseApiClass {
     private _user: User,
     studentPartial?: { id?: number; raw?: api_leerling_item; href?: string },
   ) {
-    super({
+    super(_user, {
       baseURL: `${_user.somtodayApiUrl}/rest/v1`,
       headers: { Authorization: `Bearer ${_user.accessToken}` },
     });
@@ -91,8 +94,38 @@ class Student extends baseApiClass {
     grades.sort((a, b) => a.dateOfEntry.getTime() - b.dateOfEntry.getTime());
     return grades;
   }
-  async getSchedule(): Promise<Array<any> | void> {
-    //
+  async getAppointments(): Promise<Array<Appointment>> {
+    const appointments: Array<Appointment> = [];
+
+    let start_date = "2014-01-01";
+
+    const today = new Date();
+    // do this until there are no more grades
+    for (;;) {
+      const params = new URLSearchParams();
+      params.append("additional", "vak");
+      params.append("additional", "docentAfkortingen");
+      params.append("additional", "leerlingen");
+      params.append("begindatum", start_date);
+      params.append("einddatum", `${today.toISOString().split("T")[0]}`);
+      const data: api_afspraken = await this.call({
+        method: "get",
+        url: `/afspraken`,
+        params: params,
+      });
+
+      const { items } = data;
+      items.forEach((appointment) => {
+        appointments.push(new Appointment(this._user, { raw: appointment }));
+      });
+
+      if (data.items.length < 100) break;
+    }
+
+    appointments.sort(
+      (a, b) => a.startDateTime.getTime() - b.startDateTime.getTime(),
+    );
+    return appointments;
   }
 
   async fetchStudent(): Promise<Student> {

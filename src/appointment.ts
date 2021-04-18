@@ -1,3 +1,4 @@
+import Attachment from "./attachment";
 import baseApiClass from "./baseApiClass";
 import Course from "./course";
 import Establishment from "./establishment";
@@ -34,7 +35,7 @@ export default class Appointment extends baseApiClass {
   public course?: Course;
 
   public establishment!: Establishment; // TODO: make this a class
-  public attachments: any; // TODO: make this a class
+  public attachments!: Array<Attachment>; // TODO: make this a class
 
   public fetched: Promise<Appointment>;
   private _fetchedResolver!: (
@@ -106,7 +107,9 @@ export default class Appointment extends baseApiClass {
       raw: appointmentData.vestiging,
     }); // TODO: make this a class
 
-    this.attachments = appointmentData; // TODO: make this a class
+    this.attachments = appointmentData.bijlagen.map(
+      (attachment) => new Attachment(this._user, { raw: attachment }),
+    ); // TODO: make this a class
 
     this.teacherAbbreviation =
       appointmentData.additionalObjects.docentAfkortingen;

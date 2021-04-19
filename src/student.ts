@@ -7,14 +7,14 @@ import Grade from "./grade";
 import Course from "./course";
 
 import qs = require("qs");
-import baseApiClass from "./baseApiClass";
+import baseApiClass from "./helpers/baseApiClass";
 import {
   api_afspraken,
   api_cijfer,
   api_leerling,
   api_leerling_item,
   geslacht,
-} from "./somtoday_api_types";
+} from "./helpers/somtoday_api_types";
 import User from "./user";
 import Appointment from "./appointment";
 import { URLSearchParams } from "url";

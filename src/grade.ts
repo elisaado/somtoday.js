@@ -1,11 +1,11 @@
-import baseApiClass from "./baseApiClass";
+import baseApiClass from "./helpers/baseApiClass";
 import Course from "./course";
 import {
   api_cijfer,
   api_cijfer_item,
   api_cijfer_resultaatLabel,
   api_cijfer_type,
-} from "./somtoday_api_types";
+} from "./helpers/somtoday_api_types";
 import Student from "./student";
 import User from "./user";
 

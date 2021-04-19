@@ -1,5 +1,5 @@
-import Attachment from "./attachment";
-import baseApiClass from "./baseApiClass";
+import Attachment from "./helpers/attachment";
+import baseApiClass from "./helpers/baseApiClass";
 import Course from "./course";
 import Establishment from "./establishment";
 import {
@@ -9,9 +9,10 @@ import {
   api_afspraken_item_type,
   api_vak_item,
   api_vestiging_item,
-} from "./somtoday_api_types";
+} from "./helpers/somtoday_api_types";
 import Student from "./student";
 import User from "./user";
+import AppointmentType from "./helpers/AppointmentType";
 
 export default class Appointment extends baseApiClass {
   public id!: number;
@@ -140,62 +141,5 @@ export default class Appointment extends baseApiClass {
     } else {
       return undefined;
     }
-  }
-}
-
-export class AppointmentType extends baseApiClass {
-  public id!: number;
-  public href!: string;
-
-  public name!: string;
-  public description!: string;
-  public defaultColour!: number;
-  public category!: string;
-  public activity!: string;
-
-  public percentageIIVO!: number;
-  public presenceRegistrationDefault!: boolean;
-  public active!: boolean;
-
-  public raw_establishment!: api_vestiging_item;
-  constructor(
-    private _user: User,
-    private _AppointmentType: {
-      id?: number;
-      href?: string;
-      raw?: api_afspraken_item_type;
-    },
-  ) {
-    super(_user, {
-      method: "get",
-      baseURL: _user.baseURL,
-    });
-  }
-  public fetchAppointmentType(): Promise<AppointmentType> {
-    return this.call().then((raw: api_afspraken_item_type) =>
-      this._storeAppointmentType(raw),
-    );
-  }
-
-  private _storeAppointmentType(raw: api_afspraken_item_type): AppointmentType {
-    this.id = raw.links[0].id;
-    this.href = raw.links[0].href!;
-
-    this.name = raw.naam;
-    this.description = raw.omschrijving;
-    this.defaultColour = raw.standaardKleur;
-    this.category = raw.categorie;
-    this.activity = raw.activiteit;
-
-    this.percentageIIVO = raw.percentageIIVO;
-    this.presenceRegistrationDefault = raw.presentieRegistratieDefault;
-    this.active = raw.actief;
-
-    this.raw_establishment = raw.vestiging;
-    return this;
-  }
-
-  get establishment(): Establishment {
-    return new Establishment(this._user, { raw: this.raw_establishment });
   }
 }

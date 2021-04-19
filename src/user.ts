@@ -7,22 +7,24 @@ import Grade from "./grade";
 import Course from "./course";
 
 import qs = require("qs");
-import baseApiClass from "./baseApiClass";
+import baseApiClass from "./helpers/baseApiClass";
 import {
   api_afspraken,
   api_auth_item,
   api_cijfer,
+  api_huiswerk_studiewijzer,
   api_leerling,
   geslacht,
-} from "./somtoday_api_types";
+} from "./helpers/somtoday_api_types";
 import Student from "./student";
 import { Credentials } from "./organisation";
 import Appointment from "./appointment";
 import { URLSearchParams } from "url";
+import { HomeworkAppointment } from "./homework/homeworkAppointment";
 
 const log = Debug("user");
 
-class User {
+class User extends baseApiClass {
   public accessToken!: string;
   public refreshToken!: string;
   public idToken!: string;
@@ -34,7 +36,8 @@ class User {
   private _authenticatedRejecter!: (value?: Error | PromiseLike<Error>) => void;
   private _requestInfo: AxiosRequestConfig;
   constructor(credentials: Credentials) {
-    log("Initializing user");
+    super(undefined);
+    super.setBaseUser = this;
     this._requestInfo = {
       method: "POST",
       baseURL: `https://production.somtoday.nl/oauth2/token`,
@@ -44,30 +47,28 @@ class User {
         password: credentials.password,
         scope: "openid",
         client_id: APP_ID,
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
       }),
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
     };
+    log("Initializing user");
     this.authenticated = new Promise((resolve, reject) => {
       this._authenticatedResolver = resolve;
       this._authenticatedRejecter = reject;
     });
     this._fetchInfo().then((user) => {
       this._authenticatedResolver(user);
+      this.axiosOptions = {
+        method: "get",
+        baseURL: `${this.somtodayApiUrl}/rest/v1`,
+        headers: { Authorization: `Bearer ${this.accessToken}` },
+      };
     });
     this.refreshRefreshToken = this.refreshRefreshToken.bind(this);
   }
   async getStudents(): Promise<Array<Student>> {
-    const rawStudents: api_leerling = await axios
-      .request({
-        method: "get",
-        url: `/leerlingen`,
-        baseURL: `${this.somtodayApiUrl}/rest/v1`,
-        headers: { Authorization: `Bearer ${this.accessToken}` },
-      })
-      .then((res) => res.data);
-
+    const rawStudents: api_leerling = await this.call({ url: `/leerlingen` });
     const { items } = rawStudents;
     return items.map((rawStudent) => {
       return new Student(this, {
@@ -100,15 +101,11 @@ class User {
       params.append("additional", "leerlingen");
       params.append("begindatum", start_date_string);
       params.append("einddatum", `${end_date.toISOString().split("T")[0]}`);
-      const res = await axios.request({
-        method: "get",
-        baseURL: `${this.somtodayApiUrl}/rest/v1`,
-        headers: { Authorization: `Bearer ${this.accessToken}` },
+      const data: api_afspraken = await this.call({
         url: `/afspraken`,
         params: params,
       });
       console.timeLog("appointments", start_date_string + " after request");
-      const data: api_afspraken = res.data;
       const { items } = data;
       items.forEach((appointment) => {
         const newAppointment = new Appointment(this, {
@@ -140,6 +137,43 @@ class User {
     console.timeEnd("sort");
     return filtered_appointments;
   }
+  async getHomeworkAppointments(
+    startAfterOrOn?: Date,
+  ): Promise<Array<HomeworkAppointment>> {
+    const homeworkAppointments: Array<HomeworkAppointment> = [];
+    let start_date =
+      startAfterOrOn || new Date(Date.now() - 6 * 366 * 24 * 60 * 60 * 1000);
+
+    for (;;) {
+      const data: api_huiswerk_studiewijzer = await this.call({
+        url: `/studiewijzeritemafspraaktoekenningen`,
+        params: {
+          begintNaOfOp: `${start_date.toISOString().split("T")[0]}`,
+        },
+      });
+      const { items } = data;
+      items.forEach((item) => {
+        if (
+          !homeworkAppointments.find((find) => find.id === item.links[0].id)
+        ) {
+          homeworkAppointments.push(
+            new HomeworkAppointment(this, { raw: item }),
+          );
+        }
+        let new_date = new Date(item.datumTijd);
+        if (new_date.valueOf() > start_date.valueOf()) {
+          start_date = new_date;
+        }
+      });
+      start_date = new Date(start_date.valueOf() - 1.5 * 24 * 60 * 60 * 1000);
+      if (items.length < 100) break;
+    }
+    homeworkAppointments.sort(
+      (a, b) => b.dateTime.valueOf() - a.dateTime.valueOf(),
+    );
+    return homeworkAppointments;
+  }
+
   public async refreshRefreshToken(
     refreshToken?: string,
   ): Promise<boolean | void> {

@@ -5,15 +5,14 @@ import {
   api_uploadContext_item,
   api_uploadContext_item_fileState,
 } from "./somtoday_api_types";
-import User from "./user";
+import User from "../user";
 
 export default class Attachment extends baseApiClass {
-  // DOESN'T HAVE A HREF TO FETCH
   public id!: number;
   public description!: string; // The name of the file most of the time
-  public uploadContext!: uploadContext;
-  public assemblyResults!: Array<assemblyResults>;
-  public sorting!: number; //0;
+  public raw_uploadContext!: api_uploadContext_item;
+  public raw_assemblyResults!: Array<api_assemblyResults_item>;
+  public sorting!: number;
   public visibleForStudents!: boolean;
   constructor(
     private _user: User,
@@ -27,16 +26,24 @@ export default class Attachment extends baseApiClass {
   private _storeAttachment(raw: api_bijlage_item): Attachment {
     //
     this.id = raw.links[0].id;
-    this.description = raw.omschrijving; // The name of the file most of the time
-    this.uploadContext = new uploadContext(this._user, {
-      raw: raw.uploadContext,
-    });
-    this.assemblyResults = raw.assemblyResults.map(
-      (raw) => new assemblyResults(this._user, { raw }),
-    );
+    this.description = raw.omschrijving;
+    this.raw_uploadContext = raw.uploadContext;
+
+    this.raw_assemblyResults = raw.assemblyResults;
     this.sorting = raw.sortering;
     this.visibleForStudents = raw.zichtbaarVoorLeerling;
     return this;
+  }
+  get uploadContext(): uploadContext {
+    return new uploadContext(this._user, {
+      raw: this.raw_uploadContext,
+    });
+  }
+  get assemblyResults(): Array<assemblyResults> {
+    return this.raw_assemblyResults.map(
+      (raw) => new assemblyResults(this._user, { raw }),
+    );
+    //
   }
 }
 

@@ -37,7 +37,7 @@ export type api_organisaties = [{ instellingen: Array<api_organisaties_item> }];
 // Items
 export interface api_leerling_item {
   $type: "leerling.RLeerling";
-  links: Array<api_link>;
+  links: Array<api_link_href>;
   permissions: Array<api_permission>;
   additionalObjects: any;
   UUID: api_UUID; // Like this: "ab123acd-abc1-1cba-blah-asd3a2df2sdf";
@@ -51,7 +51,7 @@ export interface api_leerling_item {
 }
 export interface api_cijfer_item {
   $type: "resultaten.RResultaat";
-  links: Array<api_link>;
+  links: Array<api_link_href>;
   permissions: Array<api_permission>;
   additionalObjects: any;
   herkansingstype: api_cijfer_herkansingstype;
@@ -82,7 +82,7 @@ export interface api_vak_item {
 }
 export interface api_afspraken_item {
   $type: "participatie.RAfspraak";
-  links: Array<api_link>;
+  links: Array<api_link_href>;
   permissions: Array<api_permission>;
   additionalObjects: {
     vak?: api_vak_item | null;
@@ -103,7 +103,7 @@ export interface api_afspraken_item {
   bijlagen: Array<api_bijlage_item>;
 }
 export interface api_afspraken_item_type {
-  links: Array<api_link>;
+  links: Array<api_link_href>;
   permissions: Array<api_permission>;
   additionalObjects: any;
   naam: string; //"les";
@@ -118,7 +118,7 @@ export interface api_afspraken_item_type {
 }
 
 export interface api_vestiging_item {
-  links: Array<api_link>;
+  links: Array<api_link_href>;
   permissions: Array<api_permission>;
   additionalObjects: any;
   naam: string;
@@ -157,7 +157,7 @@ export interface api_assemblyResults_item {
 
 export interface api_huiswerk_studiewijzer_item {
   $type: "studiewijzer.RSWIAfspraakToekenning";
-  links: Array<api_link>;
+  links: Array<api_link_href>;
   permissions: Array<api_permission>;
   additionalObjects: any;
   studiewijzer: api_studiewijzer_item;
@@ -165,10 +165,10 @@ export interface api_huiswerk_studiewijzer_item {
   sortering: number;
   lesgroep: api_lesgroep_item;
   datumTijd: string; //"2020-09-24T11:45:00.000+02:00";
-  aangemaaktOpDatumTijd: string; // "2020-09-03T12:27:00.000+02:00";
+  aangemaaktOpDatumTijd?: string; // "2020-09-03T12:27:00.000+02:00";
 }
 export interface api_lesgroep_item {
-  links: Array<api_link>;
+  links: Array<api_link_href>;
   permissions: Array<api_permission>;
   additionalObjects: {};
   UUID: api_UUID;
@@ -180,7 +180,7 @@ export interface api_lesgroep_item {
 }
 export interface api_schooljaar_item {
   $type: "onderwijsinrichting.RSchooljaar";
-  links: Array<api_link>;
+  links: Array<api_link_href>;
   permissions: Array<api_permission>;
   additionalObjects: any;
   naam: string; // something like this "2020/2021";
@@ -208,7 +208,7 @@ export interface api_studiewijzer_item {
   vestiging: api_vestiging_item;
 }
 export interface api_studiewijzerItem_item {
-  links: Array<api_link>;
+  links: Array<api_link_href>;
   permissions: Array<api_permission>;
   additionalObjects: any;
   onderwerp: string; // The text that is visible without having to click on an appointment
@@ -218,22 +218,49 @@ export interface api_studiewijzerItem_item {
   lesmateriaal: boolean;
   projectgroepen: boolean;
   bijlagen: Array<api_bijlage_item>;
-  externeMaterialen: [];
-  inlevermomenten: [];
+  externeMaterialen: Array<api_externeMaterialen_item>;
+  inlevermomenten: Array<api_inlevermomenten_item>;
   tonen: boolean;
+  notitie?: string;
   notitieZichtbaarVoorLeerling: boolean;
 }
+export interface api_externeMaterialen_item {
+  links: Array<api_link>;
+  permissions: Array<api_permission>;
+  additionalObjects: object;
+  uri: string;
+  omschrijving: string;
+  contentType: string;
+  sortering: number;
+  zichtbaarVoorLeerlingen: boolean;
+}
+export interface api_inlevermomenten_item {
+  // TODO: this needs more info, i only had one data point
+  links: Array<api_link>;
+  permissions: Array<api_permission>;
+  additionalObjects: object;
+  omschrijving: string;
+  startGeldigheid: string;
+  eindGeldigheid: string;
+  plagiaatDetectie: boolean;
+  stuurBerichtBijInlevering: boolean;
+  herinnering: number;
+  inleveringenAantal: number;
+  inleveringenVerwacht: number;
+  startSortering: number;
+  eindSortering: number;
+}
 export interface api_huiswerk_week_item {
-  $type: "studiewijzer.RSWIAfspraakToekenning";
+  $type: "studiewijzer.RSWIWeekToekenning";
   links: Array<api_link>;
   permissions: Array<api_permission>;
   additionalObjects: any;
-  studiewijzer: api_studiewijzer_item;
+  studiewijzer: api_studiewijzer_item; //
   studiewijzerItem: api_studiewijzerItem_item;
   sortering: number;
-  lesgroep: api_lesgroep_item;
-  datumTijd: string; //"2020-09-24T11:45:00.000+02:00";
-  aangemaaktOpDatumTijd: string; // "2020-09-03T12:27:00.000+02:00";
+  synchroniseertMet?: string;
+  weeknummerVanaf: number;
+  weeknummerTm: number;
 }
 export interface api_organisaties_item {
   uuid: api_UUID;
@@ -253,8 +280,14 @@ export interface api_link {
   id: number; //id id;
   rel: api_link_rel;
   type: api_link_type;
-  href?: string; // api link to fetch student ;
 }
+export interface api_link_href {
+  id: number; //id id;
+  rel: api_link_rel;
+  type: api_link_type;
+  href: string; // api link to fetch student ;
+}
+
 export interface api_permission {
   full: string; //"api_link_type:operation:instance";
   type: api_link_type;

@@ -1,22 +1,31 @@
 import axios, { AxiosError, AxiosRequestConfig, Method } from "axios";
 import qs = require("qs");
-import User from "./user";
+import User from "../user";
 
 export default class baseApiClass {
   public axiosOptions: AxiosRequestConfig;
-
-  constructor(private __user: User, options?: AxiosRequestConfig) {
+  private __user!: User;
+  constructor(user?: User, options?: AxiosRequestConfig) {
+    if (user) this.__user = user;
     this.axiosOptions = options || {};
+  }
+
+  set setBaseUser(user: User) {
+    this.__user = user;
   }
   /**
    * Call the somtoday api
    * @param {AxiosRequestConfig} [optionsParam] - The axios options for the api call
+   * @param {boolean} [overwrite] - Only use the request options from the parameter
    * @returns {Promise} The result of the api call
    */
   public async call(
     optionsParam?: AxiosRequestConfig,
     overwrite?: boolean,
   ): Promise<any> {
+    if (!this.__user)
+      throw new Error("YOU NEED TO SET THE USER YOU DUMB PERSON ");
+
     let options: AxiosRequestConfig;
     if (overwrite && !optionsParam)
       throw new Error(

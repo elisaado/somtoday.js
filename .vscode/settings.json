@@ -4,10 +4,12 @@
     "IIVO",
     "RSWI",
     "Saado",
+    "cloudfiles",
     "oidcurl",
     "oidcurls",
     "openid",
-    "somtoday"
+    "somtoday",
+    "studyguide"
   ],
   "cSpell.language": "en,nl",
   "editor.defaultFormatter": "esbenp.prettier-vscode",

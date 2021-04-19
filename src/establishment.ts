@@ -1,5 +1,5 @@
-import baseApiClass from "./baseApiClass";
-import { api_vestiging_item } from "./somtoday_api_types";
+import baseApiClass from "./helpers/baseApiClass";
+import { api_vestiging_item } from "./helpers/somtoday_api_types";
 import User from "./user";
 
 export default class Establishment extends baseApiClass {

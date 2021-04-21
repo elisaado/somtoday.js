@@ -1,6 +1,6 @@
-import baseApiClass from "./helpers/baseApiClass";
-import { api_vak_item } from "./helpers/somtoday_api_types";
-import User from "./user";
+import baseApiClass from "../baseApiClass";
+import { api_vak_item } from "../somtoday_api_types";
+import User from "../user";
 
 class Course extends baseApiClass {
   public id!: number;

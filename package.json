@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/elisaado/SOMtoday.js#readme",
   "dependencies": {
+    "@discordjs/collection": "^0.1.6",
     "axios": "^0.21.1",
     "debug": "^4.1.1",
     "fuse.js": "^5.1.0",

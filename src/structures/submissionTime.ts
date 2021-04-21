@@ -1,6 +1,6 @@
 import User from "../user";
-import baseApiClass from "./baseApiClass";
-import { api_inlevermomenten_item } from "./somtoday_api_types";
+import baseApiClass from "../baseApiClass";
+import { api_inlevermomenten_item } from "../somtoday_api_types";
 
 export default class SubmissionTime extends baseApiClass {
   public id!: number;

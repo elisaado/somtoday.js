@@ -1,26 +1,24 @@
-import { EventEmitter } from "events";
 import Debug from "debug";
 import axios, { AxiosBasicCredentials, AxiosRequestConfig } from "axios";
-import { APP_ID, APP_SECRET } from "./constants";
-import { InvalidTokenError } from "./errors";
-import Grade from "./grade";
-import Course from "./course";
+import { APP_ID } from "./constants";
 
 import qs = require("qs");
-import baseApiClass from "./helpers/baseApiClass";
+import baseApiClass from "./baseApiClass";
 import {
   api_afspraken,
   api_auth_item,
-  api_cijfer,
-  api_huiswerk_studiewijzer,
   api_leerling,
-  geslacht,
-} from "./helpers/somtoday_api_types";
-import Student from "./student";
-import { Credentials } from "./organisation";
-import Appointment from "./appointment";
+  api_schooljaar_item,
+} from "./somtoday_api_types";
+import Student from "./structures/student";
+import { Credentials } from "./structures/organisation";
+import Appointment from "./structures/appointment";
 import { URLSearchParams } from "url";
-import { HomeworkAppointment } from "./homework/homeworkAppointment";
+import HomeworkAppointment from "./structures/homeworkAppointment";
+import HomeworkDate from "./structures/HomeworkDate";
+import HomeworkWeek from "./structures/HomeworkWeek";
+import SchoolYear from "./structures/schoolYear";
+import AppointmentManager from "./managers/AppointmentManager";
 
 const log = Debug("user");
 
@@ -30,17 +28,19 @@ class User extends baseApiClass {
   public idToken!: string;
   public somtodayApiUrl!: string;
   public baseURL!: string;
+  private _raw_school_year?: SchoolYear;
 
   public authenticated: Promise<User>;
   private _authenticatedResolver!: (value: User | PromiseLike<User>) => void;
   private _authenticatedRejecter!: (value?: Error | PromiseLike<Error>) => void;
   private _requestInfo: AxiosRequestConfig;
+  private _appointmentManager?: AppointmentManager;
   constructor(credentials: Credentials) {
     super(undefined);
     super.setBaseUser = this;
     this._requestInfo = {
       method: "POST",
-      baseURL: `https://production.somtoday.nl/oauth2/token`,
+      baseURL: `https://somtoday.nl/oauth2/token`,
       data: qs.stringify({
         grant_type: "password",
         username: `${credentials.organization}\\${credentials.username}`,
@@ -76,6 +76,11 @@ class User extends baseApiClass {
       });
     });
   }
+
+  get appointments(): AppointmentManager {
+    return this._appointmentManager || new AppointmentManager(this);
+  }
+
   async getAppointments(
     startDate?: Date,
     endDate?: Date,
@@ -86,7 +91,6 @@ class User extends baseApiClass {
     const end_date =
       endDate || new Date(Date.now() + 6 * 366 * 24 * 60 * 60 * 1000);
     // do this until there are no more grades
-    console.time("appointments");
     for (;;) {
       // TODO: improve speeeeeds
       //  to improve speeds make it make a bunch of promises for like a week or two
@@ -94,7 +98,6 @@ class User extends baseApiClass {
       //  things that are missing
 
       const start_date_string = start_date.toISOString().split("T")[0];
-      console.timeLog("appointments", start_date_string);
       const params = new URLSearchParams();
       params.append("additional", "vak");
       params.append("additional", "docentAfkortingen");
@@ -105,7 +108,6 @@ class User extends baseApiClass {
         url: `/afspraken`,
         params: params,
       });
-      console.timeLog("appointments", start_date_string + " after request");
       const { items } = data;
       items.forEach((appointment) => {
         const newAppointment = new Appointment(this, {
@@ -120,8 +122,6 @@ class User extends baseApiClass {
 
       if (data.items.length < 100) break;
     }
-    console.timeEnd("appointments");
-    console.time("sort");
     const filtered_appointments = appointments.filter(
       (appointment, index, array) => {
         if (array.filter((find) => find.id === appointment.id)?.length > 1) {
@@ -134,31 +134,95 @@ class User extends baseApiClass {
     filtered_appointments.sort(
       (a, b) => b.startDateTime.valueOf() - a.startDateTime.valueOf(),
     );
-    console.timeEnd("sort");
+
     return filtered_appointments;
   }
   async getHomeworkAppointments(
     startAfterOrOn?: Date,
   ): Promise<Array<HomeworkAppointment>> {
-    const homeworkAppointments: Array<HomeworkAppointment> = [];
+    const params = new URLSearchParams();
+    params.set("additional", `swigemaaktVinkjes`);
+    params.set("additional", `leerlingen`);
+    params.set("additional", `huiswerkgemaakt`);
+    const homework: Array<HomeworkAppointment> = await this._getHomework(
+      `/studiewijzeritemafspraaktoekenningen`,
+      HomeworkAppointment,
+      startAfterOrOn,
+      params,
+    );
+    return homework;
+  }
+
+  async getHomeworkDates(startAfterOrOn?: Date) {
+    const params = new URLSearchParams();
+    params.set("additional", `swigemaaktVinkjes`);
+    params.set("additional", `leerlingen`);
+    const homework: Array<HomeworkAppointment> = await this._getHomework(
+      `/studiewijzeritemdagtoekenningen`,
+      HomeworkDate,
+      startAfterOrOn,
+      params,
+    );
+    return homework;
+  }
+
+  async getHomeworkWeeks(startAfterOrOn?: Date, weekNumbers?: number[]) {
+    const params = new URLSearchParams();
+    function getWeek(date: Date) {
+      var onejan = new Date(date.getFullYear(), 0, 1);
+      return Math.ceil(
+        ((date.valueOf() - onejan.valueOf()) / 86400000 + onejan.getDay() + 1) /
+          7,
+      );
+    }
+    startAfterOrOn = startAfterOrOn || new Date(); // TODO: Get start of year
+    const endDate = new Date(); // TODO: add week numbers
+    /*if (!weekNumbers) {
+      const date = startAfterOrOn;
+      for (;;) {
+        const week1 = getWeek(date);
+        date.setDate(date.getDate() + 7);
+        if()
+      }
+    }else{
+      weekNumbers?.forEach((number) => {
+        params.set("weeknummer", `${number}`);
+      });
+    }*/
+    params.set("additional", `swigemaaktVinkjes`);
+    params.set("additional", `leerlingen`);
+    this.call();
+    // TODO: whats up with this?!
+    // How does this work, does it request all?
+    // Do you have to add weeknummer for every single week or something?!
+  }
+
+  private async _getHomework(
+    url: string,
+    to_class: typeof HomeworkDate | typeof HomeworkAppointment,
+    startAfterOrOn?: Date,
+    paramsParam?: URLSearchParams,
+  ): Promise<Array<any>> {
+    const homeworkAppointments: Array<HomeworkDate | HomeworkAppointment> = [];
     let start_date =
       startAfterOrOn || new Date(Date.now() - 6 * 366 * 24 * 60 * 60 * 1000);
 
     for (;;) {
-      const data: api_huiswerk_studiewijzer = await this.call({
-        url: `/studiewijzeritemafspraaktoekenningen`,
-        params: {
-          begintNaOfOp: `${start_date.toISOString().split("T")[0]}`,
-        },
+      const params = new URLSearchParams(paramsParam);
+      params.append(
+        "begintNaOfOp",
+        `${start_date.toISOString().split("T")[0]}`,
+      );
+      const data = await this.call({
+        url: url,
+        params: params,
       });
       const { items } = data;
-      items.forEach((item) => {
+      items.forEach((item: any) => {
         if (
           !homeworkAppointments.find((find) => find.id === item.links[0].id)
         ) {
-          homeworkAppointments.push(
-            new HomeworkAppointment(this, { raw: item }),
-          );
+          homeworkAppointments.push(new to_class(this, { raw: item }));
         }
         let new_date = new Date(item.datumTijd);
         if (new_date.valueOf() > start_date.valueOf()) {
@@ -186,7 +250,7 @@ class User extends baseApiClass {
     };
 
     return axios
-      .post("https://production.somtoday.nl/oauth2/token", qs.stringify(body), {
+      .post("https://somtoday.nl/oauth2/token", qs.stringify(body), {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },

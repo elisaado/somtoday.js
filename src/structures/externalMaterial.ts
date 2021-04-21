@@ -1,6 +1,6 @@
 import User from "../user";
-import baseApiClass from "./baseApiClass";
-import { api_externeMaterialen_item } from "./somtoday_api_types";
+import baseApiClass from "../baseApiClass";
+import { api_externeMaterialen_item } from "../somtoday_api_types";
 
 // TODO: maak dit
 export default class ExternalMaterial extends baseApiClass {

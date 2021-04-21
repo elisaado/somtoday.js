@@ -1,5 +1,5 @@
-import Attachment from "./helpers/attachment";
-import baseApiClass from "./helpers/baseApiClass";
+import Attachment from "./attachment";
+import baseApiClass from "../baseApiClass";
 import Course from "./course";
 import Establishment from "./establishment";
 import {
@@ -9,10 +9,10 @@ import {
   api_afspraken_item_type,
   api_vak_item,
   api_vestiging_item,
-} from "./helpers/somtoday_api_types";
+} from "../somtoday_api_types";
 import Student from "./student";
-import User from "./user";
-import AppointmentType from "./helpers/AppointmentType";
+import User from "../user";
+import AppointmentType from "./AppointmentType";
 
 export default class Appointment extends baseApiClass {
   public id!: number;

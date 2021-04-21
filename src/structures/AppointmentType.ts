@@ -1,10 +1,10 @@
-import Establishment from "../establishment";
+import Establishment from "./establishment";
 import User from "../user";
-import baseApiClass from "./baseApiClass";
+import baseApiClass from "../baseApiClass";
 import {
   api_afspraken_item_type,
   api_vestiging_item,
-} from "./somtoday_api_types";
+} from "../somtoday_api_types";
 
 export default class AppointmentType extends baseApiClass {
   public id!: number;

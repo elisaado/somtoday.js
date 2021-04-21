@@ -1,10 +1,10 @@
-import Establishment from "../establishment";
+import Establishment from "./establishment";
 import User from "../user";
-import baseApiClass from "../helpers/baseApiClass";
+import baseApiClass from "../baseApiClass";
 import {
   api_studiewijzer_item,
   api_vestiging_item,
-} from "../helpers/somtoday_api_types";
+} from "../somtoday_api_types";
 
 export default class StudyGuide extends baseApiClass {
   public id!: number;

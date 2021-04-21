@@ -1,21 +1,21 @@
 import { EventEmitter } from "events";
 import Debug from "debug";
 import axios, { AxiosBasicCredentials } from "axios";
-import { APP_ID, APP_SECRET } from "./constants";
+import { APP_ID, APP_SECRET } from "../constants";
 import { InvalidTokenError } from "./errors";
 import Grade from "./grade";
 import Course from "./course";
 
 import qs = require("qs");
-import baseApiClass from "./helpers/baseApiClass";
+import baseApiClass from "../baseApiClass";
 import {
   api_afspraken,
   api_cijfer,
   api_leerling,
   api_leerling_item,
   geslacht,
-} from "./helpers/somtoday_api_types";
-import User from "./user";
+} from "../somtoday_api_types";
+import User from "../user";
 import Appointment from "./appointment";
 import { URLSearchParams } from "url";
 

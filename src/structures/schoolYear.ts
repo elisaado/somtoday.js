@@ -1,6 +1,6 @@
-import baseApiClass from "./helpers/baseApiClass";
-import { api_schooljaar_item } from "./helpers/somtoday_api_types";
-import User from "./user";
+import baseApiClass from "../baseApiClass";
+import { api_schooljaar_item } from "../somtoday_api_types";
+import User from "../user";
 
 export default class SchoolYear extends baseApiClass {
   public id!: number;

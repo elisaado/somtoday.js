@@ -1,6 +1,6 @@
 import axios, { AxiosError, AxiosRequestConfig, Method } from "axios";
 import qs = require("qs");
-import User from "../user";
+import User from "./user";
 
 export default class baseApiClass {
   public axiosOptions: AxiosRequestConfig;

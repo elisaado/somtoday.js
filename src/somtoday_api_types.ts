@@ -190,7 +190,7 @@ export interface api_schooljaar_item {
 }
 export interface api_huiswerk_datum_item {
   $type: "studiewijzer.RSWIDagToekenning";
-  links: Array<api_link>;
+  links: Array<api_link_href>;
   permissions: Array<api_permission>;
   additionalObjects: any;
   studiewijzer: api_studiewijzer_item;
@@ -252,7 +252,7 @@ export interface api_inlevermomenten_item {
 }
 export interface api_huiswerk_week_item {
   $type: "studiewijzer.RSWIWeekToekenning";
-  links: Array<api_link>;
+  links: Array<api_link_href>;
   permissions: Array<api_permission>;
   additionalObjects: any;
   studiewijzer: api_studiewijzer_item; //

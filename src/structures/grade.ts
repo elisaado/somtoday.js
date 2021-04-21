@@ -1,13 +1,13 @@
-import baseApiClass from "./helpers/baseApiClass";
+import baseApiClass from "../baseApiClass";
 import Course from "./course";
 import {
   api_cijfer,
   api_cijfer_item,
   api_cijfer_resultaatLabel,
   api_cijfer_type,
-} from "./helpers/somtoday_api_types";
+} from "../somtoday_api_types";
 import Student from "./student";
-import User from "./user";
+import User from "../user";
 
 export default class Grade extends baseApiClass {
   public id!: number;

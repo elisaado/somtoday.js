@@ -1,14 +1,14 @@
-import Attachment from "../helpers/attachment";
-import baseApiClass from "../helpers/baseApiClass";
-import ExternalMaterial from "../helpers/externalMaterial";
+import Attachment from "./attachment";
+import baseApiClass from "../baseApiClass";
+import ExternalMaterial from "./externalMaterial";
 import {
   api_bijlage_item,
   api_externeMaterialen_item,
   api_huiswerkType,
   api_inlevermomenten_item,
   api_studiewijzerItem_item,
-} from "../helpers/somtoday_api_types";
-import SubmissionTime from "../helpers/submissionTime";
+} from "../somtoday_api_types";
+import SubmissionTime from "./submissionTime";
 import User from "../user";
 
 export default class StudyGuideItem extends baseApiClass {

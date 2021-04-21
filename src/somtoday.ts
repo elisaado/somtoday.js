@@ -1,8 +1,8 @@
 import axios from "axios";
-import Organisation from "./organisation";
+import Organisation from "./structures/organisation";
 
 import Fuse = require("fuse.js");
-import { api_organisaties } from "./helpers/somtoday_api_types";
+import { api_organisaties } from "./somtoday_api_types";
 
 const fuseOptions = {
   isCaseSensitive: false,

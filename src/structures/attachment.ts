@@ -1,10 +1,10 @@
-import baseApiClass from "./baseApiClass";
+import baseApiClass from "../baseApiClass";
 import {
   api_assemblyResults_item,
   api_bijlage_item,
   api_uploadContext_item,
   api_uploadContext_item_fileState,
-} from "./somtoday_api_types";
+} from "../somtoday_api_types";
 import User from "../user";
 
 export default class Attachment extends baseApiClass {

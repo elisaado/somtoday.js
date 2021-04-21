@@ -1,8 +1,8 @@
 import { throws } from "assert";
-import baseApiClass from "../helpers/baseApiClass";
-import Class from "../class";
-import Course from "../course";
-import Establishment from "../establishment";
+import baseApiClass from "../baseApiClass";
+import Class from "./class";
+import Course from "./course";
+import Establishment from "./establishment";
 import {
   api_bijlage_item,
   api_externeMaterialen_item,
@@ -14,19 +14,19 @@ import {
   api_studiewijzerItem_item,
   api_studiewijzer_item,
   api_vestiging_item,
-} from "../helpers/somtoday_api_types";
+} from "../somtoday_api_types";
 import User from "../user";
-import Attachment from "../helpers/attachment";
-import ExternalMaterial from "../helpers/externalMaterial";
-import SubmissionPeriod from "../helpers/submissionTime";
-import submissionTime from "../helpers/submissionTime";
-import SubmissionTime from "../helpers/submissionTime";
+import Attachment from "./attachment";
+import ExternalMaterial from "./externalMaterial";
+import SubmissionPeriod from "./submissionTime";
+import submissionTime from "./submissionTime";
+import SubmissionTime from "./submissionTime";
 import StudyGuide from "./studyGuide";
 import StudyGuideItem from "./studyGuideItem";
 
 // TODO: make a week and day copy of this
 
-export class HomeworkAppointment extends baseApiClass {
+export default class HomeworkAppointment extends baseApiClass {
   public id!: number;
   public href!: string;
   public sorting!: number;

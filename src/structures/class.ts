@@ -1,12 +1,12 @@
-import baseApiClass from "./helpers/baseApiClass";
+import baseApiClass from "../baseApiClass";
 import Course from "./course";
-import SchoolYear from "./schoolyear";
+import SchoolYear from "./schoolYear";
 import {
   api_lesgroep_item,
   api_schooljaar_item,
   api_vak_item,
-} from "./helpers/somtoday_api_types";
-import User from "./user";
+} from "../somtoday_api_types";
+import User from "../user";
 //TODO: Add fetched thingy
 export default class Class extends baseApiClass {
   public id!: number;

@@ -1,6 +1,6 @@
 import axios from "axios";
-import User from "./user";
-import { APP_ID, APP_SECRET, BASE64_AUTH } from "./constants";
+import User from "../user";
+import { APP_ID, APP_SECRET, BASE64_AUTH } from "../constants";
 import qs = require("qs");
 import { ExecFileOptionsWithStringEncoding } from "child_process";
 

@@ -5,6 +5,7 @@ enum endpoints {
   homeworkAppointment = `/studiewijzeritemafspraaktoekenningen`,
   homeworkDate = `/studiewijzeritemdagtoekenningen`,
   schoolYears = `/schooljaren`,
+  grades = `/resultaten/huidigVoorLeerling`,
 }
 
 // TODO: make everything use this

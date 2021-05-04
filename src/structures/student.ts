@@ -18,6 +18,7 @@ import {
 import User from "../user";
 import Appointment from "./appointment";
 import { URLSearchParams } from "url";
+import GradeManager from "../managers/GradeManager";
 
 const log = Debug("student");
 
@@ -37,6 +38,8 @@ class Student extends baseApiClass {
   public fetched: Promise<Student>;
   private _fetchedResolver!: (value: Student | PromiseLike<Student>) => void;
   private _fetchedRejecter!: (value?: Error | PromiseLike<Error>) => void;
+
+  private _gradeManager?: GradeManager;
   constructor(
     private _user: User,
     studentPartial?: { id?: number; raw?: api_leerling_item; href?: string },
@@ -64,35 +67,13 @@ class Student extends baseApiClass {
     }
   }
 
-  async getGrades(): Promise<Array<Grade>> {
-    const grades: Array<Grade> = [];
-
-    let i = 0;
-    let j = 99;
-
-    // do this until there are no more grades
-    for (;;) {
-      const data: api_cijfer = await this.call({
-        method: "get",
-        url: `/resultaten/huidigVoorLeerling/${this.id}`,
-        headers: {
-          range: `items=${i}-${j}`,
-        },
-      });
-
-      i += 100;
-      j += 100;
-
-      const { items } = data;
-      items.forEach((grade) => {
-        grades.push(new Grade(this._user, { raw: grade }));
-      });
-
-      if (data.items.length < 100) break;
-    }
-
-    grades.sort((a, b) => a.dateOfEntry.getTime() - b.dateOfEntry.getTime());
-    return grades;
+  get gradeManager(): GradeManager {
+    return (
+      this._gradeManager ||
+      (this._gradeManager = new GradeManager(this._user, {
+        studentID: this.id,
+      }))
+    );
   }
 
   async fetchStudent(): Promise<Student> {

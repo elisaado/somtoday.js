@@ -1,8 +1,4 @@
-import axios from "axios";
 import User from "../user";
-import { APP_ID, APP_SECRET, BASE64_AUTH } from "../constants";
-import qs = require("qs");
-import { ExecFileOptionsWithStringEncoding } from "child_process";
 
 export interface Credentials {
   username: string;
@@ -18,15 +14,22 @@ class Organization {
   ) {
     // do nothing
   }
-
-  async authenticate(credentials: Credentials): Promise<User> {
+  /**
+   * Authenticate to Somtoday
+   * @param credentials User Log in credentials or refresh token
+   * @returns {user} User - The User who logged in
+   */
+  async authenticate(credentials: Credentials | string): Promise<User> {
+    if (typeof credentials == "string") {
+      return new User(credentials);
+    }
     credentials.organization = credentials.organization || this.uuid;
-    return new User(credentials);
     if (credentials.username.trim().length === 0) {
       throw new Error("No username provided");
     } else if (credentials.password.trim().length === 0) {
       throw new Error("No password provided");
     }
+    return new User(credentials);
   }
 }
 

@@ -28,7 +28,6 @@ export default class AppointmentManager extends baseApiClass {
     cache: boolean = true,
     force: boolean = true,
   ): Promise<Appointment | Collection<number, Appointment>> {
-    console.log(cache);
     return typeof appointment == "number"
       ? this._fetchId(appointment, cache, force)
       : this._fastFetchMany(appointment, cache, force);
@@ -50,10 +49,9 @@ export default class AppointmentManager extends baseApiClass {
   }
   private async _fastFetchMany(
     options: AppointmentQueryOptions,
-    cache: boolean,
+    to_cache: boolean,
     force: boolean,
   ): Promise<Collection<number, Appointment>> {
-    console.log(cache);
     // TODO: make this use cache when it can
     // TODO: fetches to much rn
 
@@ -66,26 +64,25 @@ export default class AppointmentManager extends baseApiClass {
     let rawArray: Array<api_afspraken_item> = [];
 
     const time = end_date.valueOf() - start_date.valueOf();
-    const parts = Math.ceil(time / (12 * 24 * 60 * 60 * 1000));
+    const parts = Math.ceil(time / (10 * 24 * 60 * 60 * 1000));
 
     const part_size = Math.ceil(time / parts);
-    console.log(time);
-    console.log(parts);
-    console.log(part_size);
     const promises: Array<Promise<void>> = [];
     for (var i = 0; i < parts; i++) {
       promises.push(
         new Promise(async (resolve) => {
-          console.log(i);
           const start_date_string = new Date(
             start_date.valueOf() + part_size * i,
           )
             .toISOString()
             .split("T")[0];
           const params = new URLSearchParams();
-          params.append("additional", "vak"); // TODO: this
-          params.append("additional", "docentAfkortingen"); // TODO: this
-          params.append("additional", "leerlingen"); // TODO: this
+          // options.additional?.forEach((additional) => {
+          //   params.append("additional", additional.toString());
+          // });
+          params.append("additional", "vak");
+          params.append("additional", "docentAfkortingen");
+          params.append("additional", "leerlingen");
           params.append("begindatum", start_date_string);
           const response = await this._fetchMany(params);
           rawArray = rawArray.concat(response);
@@ -99,10 +96,12 @@ export default class AppointmentManager extends baseApiClass {
       const newAppointment = new Appointment(this._user, {
         raw: appointment,
       });
-      if (cache) {
+      if (to_cache) {
         this.cache.set(appointment.links[0].id, newAppointment);
       }
-      appointments.set(appointment.links[0].id, newAppointment);
+      if (newAppointment.endDateTime.valueOf() < end_date.valueOf()) {
+        appointments.set(appointment.links[0].id, newAppointment);
+      }
     });
 
     const sorted_appointments = appointments.sort(
@@ -125,7 +124,7 @@ export default class AppointmentManager extends baseApiClass {
 export interface AppointmentQueryOptions {
   startDate?: Date;
   endDate?: Date;
-  additional?: AppointmentQueryAdditional[];
+  //additional?: Array<AppointmentQueryAdditional>;
 }
 
 export enum AppointmentQueryAdditional {

@@ -24,8 +24,6 @@ import SubmissionTime from "./submissionTime";
 import StudyGuide from "./studyGuide";
 import StudyGuideItem from "./studyGuideItem";
 
-// TODO: make a week and day copy of this
-
 export default class HomeworkAppointment extends baseApiClass {
   public id!: number;
   public href!: string;

@@ -13,6 +13,8 @@ import {
 import Student from "./student";
 import User from "../user";
 import AppointmentType from "./AppointmentType";
+import { URLSearchParams } from "url";
+import endpoints from "../endpoints";
 
 export default class Appointment extends baseApiClass {
   public id!: number;
@@ -34,7 +36,8 @@ export default class Appointment extends baseApiClass {
 
   public teacherAbbreviation?: string;
   public students?: Array<Student>;
-  public raw_course?: api_vak_item;
+  private _raw_course?: api_vak_item;
+  private _course?: Course;
 
   public establishment!: Establishment;
   public attachments!: Array<Attachment>;
@@ -84,8 +87,13 @@ export default class Appointment extends baseApiClass {
     }
   }
   async fetchAppointment(): Promise<Appointment> {
+    const params = new URLSearchParams();
+    params.append("additional", "leerlingen");
+    params.append("additional", "vak");
+    params.append("additional", "docentAfkortingen");
     return this.call({
-      url: `/afspraken/${this.id}`,
+      url: endpoints.appointment + `/${this.id}`,
+      params: params,
     }).then((response: api_afspraken_item) => {
       return this._storeAppointment(response);
     });
@@ -118,7 +126,7 @@ export default class Appointment extends baseApiClass {
     this.teacherAbbreviation =
       appointmentData.additionalObjects.docentAfkortingen;
     if (appointmentData.additionalObjects.vak) {
-      this.raw_course = appointmentData.additionalObjects.vak;
+      this._raw_course = appointmentData.additionalObjects.vak;
     }
     if (appointmentData.additionalObjects.leerlingen) {
       this.students = appointmentData.additionalObjects.leerlingen?.items.map(
@@ -129,15 +137,15 @@ export default class Appointment extends baseApiClass {
         },
       );
     }
-
     return this;
   }
 
   get course(): Course | undefined {
-    if (this.raw_course) {
-      return new Course(this._user, {
-        raw: this.raw_course,
-      });
+    if (this._course) return this._course;
+    else if (this._raw_course) {
+      return (this._course = new Course(this._user, {
+        raw: this._raw_course,
+      }));
     } else {
       return undefined;
     }

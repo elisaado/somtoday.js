@@ -7,7 +7,6 @@ import {
   api_vak_item,
 } from "../somtoday_api_types";
 import User from "../user";
-//TODO: Add fetched thingy
 export default class Class extends baseApiClass {
   public id!: number;
   public href!: string;

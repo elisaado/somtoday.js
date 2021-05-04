@@ -1,4 +1,5 @@
 import baseApiClass from "../baseApiClass";
+import endpoints from "../endpoints";
 import { api_schooljaar_item } from "../somtoday_api_types";
 import User from "../user";
 
@@ -27,7 +28,7 @@ export default class SchoolYear extends baseApiClass {
   ) {
     super(_user, {
       method: "get",
-      baseURL: _user.baseURL + "/schooljaren",
+      baseURL: _user.baseURL + endpoints.schoolYears,
       headers: { Authorization: "Bearer " + _user.accessToken },
     });
     this.fetched = new Promise((resolve, reject) => {
@@ -69,5 +70,29 @@ export default class SchoolYear extends baseApiClass {
     this.isCurrent = raw.isHuidig;
 
     return this;
+  }
+
+  public weekNumbers(startDate?: Date, endDate?: Date): Array<number> {
+    const start = this._weekNumber(startDate || this.fromDate);
+    const between = this._weeksBetween(
+      startDate || this.fromDate,
+      endDate || this.toDate,
+    );
+    return this._range(0, between).map((numb) => (start + numb) % 52);
+  }
+  private _weeksBetween(d1: Date, d2: Date): number {
+    return Math.ceil((d2.valueOf() - d1.valueOf()) / (7 * 24 * 60 * 60 * 1000));
+  }
+  private _weekNumber(d: Date): number {
+    let oneJan = new Date(d.getFullYear(), 0, 1);
+    let numberOfDays = Math.floor(
+      (d.valueOf() - oneJan.valueOf()) / (24 * 60 * 60 * 1000),
+    );
+    let result = Math.ceil((d.getDay() + 1 + numberOfDays) / 7);
+    return result;
+  }
+  private _range(start: number, end: number): Array<number> {
+    if (start === end) return [start];
+    return [start, ...this._range(start + 1, end)];
   }
 }

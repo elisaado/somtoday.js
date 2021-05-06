@@ -1,5 +1,5 @@
 import axios from "axios";
-import Organisation from "./organisation";
+import Organisation from "./structures/organisation";
 
 import Fuse = require("fuse.js");
 import { api_organisaties } from "./somtoday_api_types";
@@ -45,6 +45,9 @@ class SOMToday {
   // Retreive a single organisation
   // Query can be (part of) an organisation name
   // It can also be its UUID
+
+  // uhm, what does this mean? -Fish
+
   async searchOrganisation(query: Query): Promise<Organisation | undefined> {
     const organizations = await this.getOrganizations(); /*.map((org) => {
       return { name: org.name, uuid: org.uuid, plaats: org.location, org: org };

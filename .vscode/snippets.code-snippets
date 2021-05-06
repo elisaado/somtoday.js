@@ -1,0 +1,73 @@
+{
+  // Place your somtoday.js workspace snippets here. Each snippet is defined under a snippet name and has a scope, prefix, body and
+  // description. Add comma separated ids of the languages where the snippet is applicable in the scope field. If scope
+  // is left empty or omitted, the snippet gets applied to all languages. The prefix is what is
+  // used to trigger the snippet and the body will be expanded and inserted. Possible variables are:
+  // ${1}, ${2} for tab stops, ${0} for the final cursor position, and ${1:label}, ${2:another} for placeholders.
+  // Placeholders with the same ids are connected.
+  // Example:
+  // "Print to console": {
+  // 	"scope": "javascript,typescript",
+  // 	"prefix": "log",
+  // 	"body": [
+  // 		"console.log('${1}');",
+  // 		"${2}"
+  // 	],
+  // 	"description": "Log output to console"
+  // }
+
+  "Base Class": {
+    "prefix": ["new-api-class", "som-class", "somclass"],
+    "body": [
+      "export default class ${1} extends baseApiClass {",
+      "  public id!: number;",
+      "  public href!: string;",
+      "  public fetched: Promise<${1}>;",
+      "  private _fetchedResolver!: (value: ${1} | PromiseLike<${1}>) => void;",
+      "  private _fetchedRejecter!: (value?: Error | PromiseLike<Error>) => void;",
+      "  constructor(",
+      "    private _user: User,",
+      "    private _Partial: {",
+      "      id?: number;",
+      "      href?: string;",
+      "      raw?: ${2};",
+      "    },",
+      "  ) {",
+      "    super(_user, {",
+      "      method: \"get\",",
+      "      baseURL: `${_user.baseURL}/${3}`,",
+      "      headers: { Authorization: `Bearer ${_user.accessToken}` },",
+      "    });",
+      "    this.fetched = new Promise((resolve, reject) => {",
+      "      this._fetchedResolver = resolve;",
+      "      this._fetchedRejecter = reject;",
+      "    });",
+      "    ",
+      "    if (_Partial.id) {",
+      "      this.id = _Partial.id;",
+      "      this.fetch${1}().then((classs) => {",
+      "        this._fetchedResolver(classs);",
+      "      });",
+      "    } else if (_Partial.href) {",
+      "      this.href = _Partial.href;",
+      "      this.call({ baseURL: this.href }).then((raw: ${2}) => {",
+      "        this._fetchedResolver(this._store${1}(raw));",
+      "      });",
+      "    } else if (_Partial.raw) {",
+      "      this._fetchedResolver(this._store${1}(_Partial.raw));",
+      "    } else throw new Error(\"You must provide a ${1} Partial\");",
+      "  }",
+      "  public async fetch${1}(): Promise<${1}> {",
+      "    const data = await this.call({ url: `${this.id}` });",
+      "    return this._store${1}(data);",
+      "  }",
+      "  private _store${1}(raw: ${2}): ${1} {",
+      "    this.id = raw.links[0].id;",
+      "    this.href = raw.links[0].href!;",
+      "    return this;",
+      "  }",
+      "}"
+    ],
+    "description": "Creates a base class for a somtoday api component"
+  }
+}

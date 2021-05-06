@@ -1,172 +1,127 @@
-import { EventEmitter } from "events";
 import Debug from "debug";
-import axios, { AxiosBasicCredentials } from "axios";
-import { APP_ID, APP_SECRET } from "./constants";
-import { InvalidTokenError } from "./errors";
-import Grade from "./grade";
-import Course from "./course";
+import axios, { AxiosBasicCredentials, AxiosRequestConfig } from "axios";
+import { APP_ID } from "./constants";
 
 import qs = require("qs");
+import baseApiClass from "./baseApiClass";
+import { api_auth_item, api_leerling } from "./somtoday_api_types";
+import Student from "./structures/student";
+import { Credentials } from "./structures/organisation";
+import SchoolYear from "./structures/schoolYear";
+import AppointmentManager from "./managers/AppointmentManager";
+import HomeworkManager from "./managers/HomeworkManager";
+import SchoolYearManager from "./managers/SchoolYearManager";
+import endpoints from "./endpoints";
 
 const log = Debug("user");
 
-// currently all methods we need
-type Methods = "get" | "post";
-
-interface CallParams {
-  method: Methods;
-  url: string;
-  data?: object;
-  headers?: any;
-  auth?: AxiosBasicCredentials;
-}
-
-class User extends EventEmitter {
-  public id!: number;
-  public uuid!: string;
-  public pupilNumber!: number;
-  public firstName!: string;
-  public lastName!: string;
-  public email!: string;
-  public mobileNumber!: string;
-  public birthDate!: Date;
-  public gender!: string;
+class User extends baseApiClass {
+  public accessToken!: string;
+  public refreshToken!: string;
+  public idToken!: string;
+  public somtodayApiUrl!: string;
+  public baseURL!: string;
 
   public authenticated: Promise<User>;
-
   private _authenticatedResolver!: (value: User | PromiseLike<User>) => void;
   private _authenticatedRejecter!: (value?: Error | PromiseLike<Error>) => void;
 
-  constructor(
-    public accessToken: string,
-    public refreshToken: string,
-    public idToken: string,
-    public somtodayApiUrl: string,
-  ) {
+  private _appointmentManager?: AppointmentManager;
+  private _homeworkManager?: HomeworkManager;
+  private _schoolYearManager?: SchoolYearManager;
+  constructor(credentials: Credentials | string) {
     super();
-
+    super.setBaseUser = this;
     log("Initializing user");
-    this._fetchInfo = this._fetchInfo.bind(this);
-    this._refreshToken = this._refreshToken.bind(this);
-    this._call = this._call.bind(this);
-
     this.authenticated = new Promise((resolve, reject) => {
       this._authenticatedResolver = resolve;
       this._authenticatedRejecter = reject;
     });
 
-    this._fetchInfo().then((userInfo) => {
-      this.id = userInfo.links[0].id;
-      this.uuid = userInfo.UUID;
-      this.pupilNumber = userInfo.leerlingnummer;
-      this.firstName = userInfo.roepnaam;
-      this.lastName = userInfo.achternaam;
-      this.email = userInfo.email;
-      this.mobileNumber = userInfo.mobielNummer;
-      this.birthDate = new Date(userInfo.geboortedatum);
-      this.gender = userInfo.geslacht;
-      this._authenticatedResolver(this);
-    });
-    // .catch(e => {
-    //   // if (e instanceof InvalidTokenError) {
-    //   //   log("Unable to refresh token, please make sure you are using the correct token.")
-    //   //   throw new InvalidTokenError();
-    //   // }
-    // });
-  }
-
-  async getGrades(): Promise<Array<Grade>> {
-    const grades: Array<Grade> = [];
-
-    let i = 0;
-    let j = 99;
-
-    // do this until there are no more grades
-    for (;;) {
-      const { data } = await this._call({
-        method: "get",
-        url: `/resultaten/huidigVoorLeerling/${this.id}`,
-        headers: {
-          range: `items=${i}-${j}`,
-        },
+    if (typeof credentials == "string") {
+      this.refreshRefreshToken(credentials).then((res) => {
+        if (res) {
+          this._authenticatedResolver(this);
+        } else {
+          throw new Error("Your refresh token was invalid");
+        }
       });
-
-      i += 100;
-      j += 100;
-
-      const { items } = data;
-      items.forEach((grade: any) => {
-        const { vak } = grade;
-        const course = new Course(vak.links[0].id, vak.afkorting, vak.naam);
-        if (!grade.resultaat) grade.resultaat = grade.resultaatLabelAfkorting;
-
-        grades.push(
-          new Grade(
-            grade.links[0].id,
-            grade.resultaat,
-            grade.type,
-            grade.omschrijving,
-            grade.leerjaar,
-            grade.periode,
-            grade.weging,
-            grade.examenWeging,
-            grade.toetsNietGemaakt,
-            grade.teltNietmee,
-            grade.isExamendossierResultaat,
-            grade.isVoortgangsdossierResultaat,
-            new Date(grade.datumInvoer),
-            course,
-          ),
-        );
-      });
-
-      if (data.items.length < 100) break;
+    } else {
+      const requestInfo: AxiosRequestConfig = {
+        method: "POST",
+        baseURL: `https://somtoday.nl/oauth2/token`,
+        data: qs.stringify({
+          grant_type: "password",
+          username: `${credentials.organization}\\${credentials.username}`,
+          password: credentials.password,
+          scope: "openid",
+          client_id: APP_ID,
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+        }),
+      };
+      log("Fetching auth info");
+      axios
+        .request(requestInfo)
+        .then((res) => res.data)
+        .then((data: api_auth_item) => {
+          this._storeInfo(data);
+          this._authenticatedResolver(this);
+          this.axiosOptions = {
+            method: "get",
+            baseURL: `${this.somtodayApiUrl}` + endpoints.baseURL,
+            headers: { Authorization: `Bearer ${this.accessToken}` },
+          };
+        });
     }
-
-    grades.sort((a, b) => a.dateOfEntry.getTime() - b.dateOfEntry.getTime());
-    return grades;
+    this.refreshRefreshToken = this.refreshRefreshToken.bind(this);
   }
-
-  private async _fetchInfo() {
-    log("Fetching user info");
-
-    return this._call({
-      method: "get",
-      url: "/leerlingen",
-    }).then((infoResponse) => {
-      const { data } = infoResponse;
-      const userInfo = data.items[0];
-
-      return userInfo;
+  async getStudents(): Promise<Array<Student>> {
+    const rawStudents: api_leerling = await this.call({ url: `/leerlingen` });
+    const { items } = rawStudents;
+    return items.map((rawStudent) => {
+      return new Student(this, {
+        raw: rawStudent,
+      });
     });
   }
 
-  private async _refreshToken(refreshToken: string): Promise<boolean | void> {
+  get appointmentsManager(): AppointmentManager {
+    return (
+      this._appointmentManager ||
+      (this._appointmentManager = new AppointmentManager(this))
+    );
+  }
+
+  get schoolYearManager(): SchoolYearManager {
+    return this._schoolYearManager || new SchoolYearManager(this);
+  }
+
+  get homeworkManager(): HomeworkManager {
+    return this._homeworkManager || new HomeworkManager(this);
+  }
+
+  public async refreshRefreshToken(
+    refreshToken?: string,
+  ): Promise<boolean | void> {
     log("Token expired");
     log("Refreshing user token");
     const body = {
       grant_type: "refresh_token",
-      refresh_token: refreshToken,
-      scope: "openid",
+      refresh_token: refreshToken || this.refreshToken,
+      client_id: APP_ID,
     };
 
     return axios
-      .post("https://production.somtoday.nl/oauth2/token", qs.stringify(body), {
-        auth: {
-          username: APP_ID,
-          password: APP_SECRET,
-        },
+      .post("https://somtoday.nl/oauth2/token", qs.stringify(body), {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
       })
       .then((authResponse) => {
-        const { data } = authResponse;
-        this.accessToken = data.access_token;
-        this.refreshToken = data.refresh_token;
-        this.idToken = data.id_token;
-        this.emit("token_refreshed");
-
+        const { data }: { data: api_auth_item } = authResponse;
+        this._storeInfo(data);
         return true;
       })
       .catch((e) => {
@@ -177,39 +132,19 @@ class User extends EventEmitter {
               "Access denied by resource owner or authorization server: Unauthorized account")
         ) {
           log("Unable to refresh token");
-          // todo: make this better
-          this._authenticatedRejecter(new InvalidTokenError());
+          console.error(e);
+          return false;
         }
       });
   }
 
-  private async _call(callParams: CallParams): Promise<any> {
-    log(`a call has been made to ${callParams.url}`);
-
-    // to prevent assigning to parametres
-    const params = Object.create(callParams);
-    if (!params.headers) params.headers = {};
-    if (!params.headers.Authorization) {
-      params.headers.Authorization = `Bearer ${this.accessToken}`;
-    }
-
-    return axios({
-      method: params.method,
-      url: params.url,
-      data: params.data,
-      headers: params.headers,
-      auth: params.auth,
-      baseURL: `${this.somtodayApiUrl}/rest/v1`,
-    }).catch((e) => {
-      if (e.response.status === 401 && !e.response.data) {
-        return this._refreshToken(this.refreshToken).then((status) => {
-          if (!status) throw new InvalidTokenError();
-          return this._call(callParams);
-        });
-      }
-
-      throw e;
-    });
+  private _storeInfo(authInfo: api_auth_item): User {
+    this.accessToken = authInfo.access_token;
+    this.refreshToken = authInfo.refresh_token;
+    this.idToken = authInfo.id_token;
+    this.somtodayApiUrl = authInfo.somtoday_api_url;
+    this.baseURL = `${authInfo.somtoday_api_url}` + endpoints.baseURL;
+    return this;
   }
 }
 

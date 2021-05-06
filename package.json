@@ -1,6 +1,6 @@
 {
   "name": "somtoday.js",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "The SOMtoday JavaScript library used for Debyl.",
   "main": "dist/somtoday.js",
   "types": "dist/somtoday.d.ts",
@@ -12,7 +12,7 @@
     "type": "git",
     "url": "git+https://github.com/elisaado/SOMtoday.js.git"
   },
-  "author": "Eli Saado",
+  "author": "Eli Saado & Contributors",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/elisaado/SOMtoday.js/issues"

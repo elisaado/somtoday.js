@@ -1,6 +1,6 @@
 {
   "name": "somtoday.js",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "A JavaScript library for the SOMtoday REST API.",
   "main": "dist/somtoday.js",
   "types": "dist/somtoday.d.ts",

@@ -1,7 +1,7 @@
 {
   "name": "somtoday.js",
-  "version": "0.2.0",
-  "description": "The SOMtoday JavaScript library used for Debyl.",
+  "version": "0.2.1",
+  "description": "A JavaScript library for the SOMtoday REST API.",
   "main": "dist/somtoday.js",
   "types": "dist/somtoday.d.ts",
   "scripts": {
@@ -31,6 +31,6 @@
     "@types/qs": "^6.9.1",
     "dotenv": "^8.2.0",
     "prettier": "2.2.1",
-    "typescript": "^3.8.3"
+    "typescript": "^3.9.9"
   }
 }

@@ -24,15 +24,15 @@ export default class AppointmentType extends baseApiClass {
   constructor(
     private _user: User,
     private _AppointmentType: {
-      id?: number;
-      href?: string;
-      raw?: api_afspraken_item_type;
+      raw: api_afspraken_item_type;
     },
   ) {
     super(_user, {
       method: "get",
+      url: "DO DIS PLS :D",
       baseURL: _user.baseURL,
     });
+    this._storeAppointmentType(_AppointmentType.raw);
   }
   public async fetchAppointmentType(): Promise<AppointmentType> {
     const raw = await this.call();
@@ -59,5 +59,23 @@ export default class AppointmentType extends baseApiClass {
 
   get establishment(): Establishment {
     return new Establishment(this._user, { raw: this.raw_establishment });
+  }
+
+  toObject() {
+    return {
+      id: this.id,
+      href: this.href,
+
+      name: this.name,
+      description: this.description,
+      defaultColour: this.defaultColour,
+      category: this.category,
+      activity: this.activity,
+
+      percentageIIVO: this.percentageIIVO,
+      presenceRegistrationDefault: this.presenceRegistrationDefault,
+      active: this.active,
+      establishment: this.establishment.toObject(),
+    };
   }
 }

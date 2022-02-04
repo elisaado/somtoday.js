@@ -10,8 +10,8 @@ import User from "../user";
 export default class Attachment extends baseApiClass {
   public id!: number;
   public description!: string; // The name of the file most of the time
-  public raw_uploadContext!: api_uploadContext_item;
-  public raw_assemblyResults!: Array<api_assemblyResults_item>;
+  private raw_uploadContext!: api_uploadContext_item;
+  private raw_assemblyResults!: Array<api_assemblyResults_item>;
   public sorting!: number;
   public visibleForStudents!: boolean;
   constructor(
@@ -21,6 +21,7 @@ export default class Attachment extends baseApiClass {
     },
   ) {
     super(_user);
+    this._storeAttachment(_attachmentPartial.raw);
   }
 
   private _storeAttachment(raw: api_bijlage_item): Attachment {
@@ -45,6 +46,19 @@ export default class Attachment extends baseApiClass {
     );
     //
   }
+
+  toObject() {
+    return {
+      id: this.id,
+      description: this.description,
+      sorting: this.sorting,
+      visibleForStudents: this.visibleForStudents,
+      uploadContext: this.uploadContext.toObject(),
+      assemblyResults: this.assemblyResults.map((assemblyResult) =>
+        assemblyResult.toObject(),
+      ),
+    };
+  }
 }
 
 export class uploadContext extends baseApiClass {
@@ -67,6 +81,13 @@ export class uploadContext extends baseApiClass {
     this.assemblyId = raw.assemblyId;
     return this;
   }
+  toObject() {
+    return {
+      id: this.id,
+      fileState: this.fileState,
+      assemblyId: this.assemblyId,
+    };
+  }
 }
 export class assemblyResults extends baseApiClass {
   public id!: number;
@@ -78,7 +99,6 @@ export class assemblyResults extends baseApiClass {
   public fileType!: string;
   public fileUrl!: string;
   public sslUrl!: string;
-
   constructor(
     private _user: User,
     private _assemblyResultsPartial: { raw: api_assemblyResults_item },
@@ -99,5 +119,19 @@ export class assemblyResults extends baseApiClass {
     this.fileType = raw.fileType;
     this.fileUrl = raw.fileUrl;
     this.sslUrl = raw.sslUrl;
+  }
+
+  toObject() {
+    return {
+      id: this.id,
+      fileExtension: this.fileExtension,
+      assemblyFileType: this.assemblyFileType,
+      mimeType: this.mimeType,
+      fileName: this.fileName,
+      fileSize: this.fileSize,
+      fileType: this.fileType,
+      fileUrl: this.fileUrl,
+      sslUrl: this.sslUrl,
+    };
   }
 }

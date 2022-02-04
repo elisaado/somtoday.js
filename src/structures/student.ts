@@ -6,7 +6,8 @@ import { InvalidTokenError } from "./errors";
 import Grade from "./grade";
 import Course from "./course";
 
-import qs = require("qs");
+import qs from "qs";
+
 import baseApiClass from "../baseApiClass";
 import {
   api_afspraken,
@@ -107,6 +108,20 @@ class Student extends baseApiClass {
     this.gender = studentInfo.geslacht;
     this;
     return this;
+  }
+  toObject() {
+    return {
+      id: this.id,
+      href: this.href,
+      uuid: this.uuid,
+      pupilNumber: this.pupilNumber,
+      firstName: this.firstName,
+      lastName: this.lastName,
+      email: this.email,
+      mobileNumber: this.mobileNumber,
+      birthDate: this.birthDate,
+      gender: this.gender,
+    };
   }
 }
 

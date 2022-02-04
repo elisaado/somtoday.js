@@ -31,6 +31,13 @@ class Organization {
     }
     return new User(credentials);
   }
+  toObject() {
+    return {
+      uuid: this.uuid,
+      name: this.name,
+      location: this.location,
+    };
+  }
 }
 
 export { Organization as default };

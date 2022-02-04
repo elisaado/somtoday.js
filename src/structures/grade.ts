@@ -36,7 +36,7 @@ export default class Grade extends baseApiClass {
   private _fetchedRejecter!: (value?: Error | PromiseLike<Error>) => void;
   constructor(
     private _user: User,
-    private _gradePartial: {
+    _gradePartial: {
       raw?: api_cijfer_item;
       id?: number;
       href?: string;
@@ -101,5 +101,26 @@ export default class Grade extends baseApiClass {
     this.dateOfEntry = new Date(gradeInfo.datumInvoer);
     this.raw = gradeInfo;
     return this;
+  }
+
+  toObject() {
+    return {
+      id: this.id,
+      href: this.href,
+      grade: this.grade,
+      gradeLabel: this.gradeLabel,
+      type: this.type,
+      description: this.description,
+      year: this.year,
+      period: this.period,
+      weight: this.weight,
+      examWeight: this.examWeight,
+      testNotMade: this.testNotMade,
+      doesNotCount: this.doesNotCount,
+      countsForExamFile: this.countsForExamFile,
+      countsForProgressFile: this.countsForProgressFile,
+      dateOfEntry: this.dateOfEntry,
+      course: this.course.toObject(),
+    };
   }
 }

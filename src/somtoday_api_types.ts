@@ -164,7 +164,7 @@ export interface api_huiswerk_studiewijzer_item {
   links: Array<api_link_href>;
   permissions: Array<api_permission>;
   additionalObjects: any;
-  studiewijzer: api_studiewijzer_item;
+  // studiewijzer: api_studiewijzer_item;
   studiewijzerItem: api_studiewijzerItem_item;
   sortering: number;
   lesgroep: api_lesgroep_item;
@@ -197,20 +197,20 @@ export interface api_huiswerk_datum_item {
   links: Array<api_link_href>;
   permissions: Array<api_permission>;
   additionalObjects: any;
-  studiewijzer: api_studiewijzer_item;
+  // studiewijzer: api_studiewijzer_item;
   studiewijzerItem: api_studiewijzerItem_item;
   sortering: 0; // TODO: what is this
   datumTijd: string; // ISO-8601 "2020-10-08T00:00:00.000+02:00";
   lesgroep: api_lesgroep_item;
 }
-export interface api_studiewijzer_item {
-  links: Array<api_link>;
-  permissions: Array<api_permission>;
-  additionalObjects: any;
-  uuid: api_UUID;
-  naam: string;
-  vestiging: api_vestiging_item;
-}
+// export interface api_studiewijzer_item {
+//   links: Array<api_link>;
+//   permissions: Array<api_permission>;
+//   additionalObjects: any;
+//   uuid: api_UUID;
+//   naam: string;
+//   vestiging: api_vestiging_item;
+// }
 export interface api_studiewijzerItem_item {
   links: Array<api_link_href>;
   permissions: Array<api_permission>;
@@ -259,7 +259,7 @@ export interface api_huiswerk_week_item {
   links: Array<api_link_href>;
   permissions: Array<api_permission>;
   additionalObjects: any;
-  studiewijzer: api_studiewijzer_item; //
+  // studiewijzer: api_studiewijzer_item; //
   studiewijzerItem: api_studiewijzerItem_item;
   sortering: number;
   synchroniseertMet?: string;

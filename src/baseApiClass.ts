@@ -1,5 +1,5 @@
 import axios, { AxiosError, AxiosRequestConfig, Method } from "axios";
-import qs = require("qs");
+import qs from "qs";
 import User from "./user";
 
 export default class baseApiClass {
@@ -33,10 +33,13 @@ export default class baseApiClass {
       );
 
     if (!overwrite) {
-      options = Object.assign({}, this.axiosOptions);
-      Object.assign(options, optionsParam);
+      options = Object.assign({}, this.axiosOptions, optionsParam);
+      if (!options.headers) options.headers = {};
       if (this.axiosOptions.headers) {
-        Object.assign(options.headers || {}, this.axiosOptions.headers);
+        Object.assign(options.headers, this.axiosOptions.headers);
+      }
+      if (optionsParam?.headers) {
+        Object.assign(options.headers, optionsParam.headers);
       }
     } else {
       options = optionsParam!;
@@ -46,6 +49,7 @@ export default class baseApiClass {
     else if (!options?.method) throw new Error("No request method provided");
 
     if (
+      options.headers &&
       Object.keys(options.headers).includes("Authorization") &&
       options.headers["Authorization"]?.startsWith("Bearer ")
     ) {
@@ -58,7 +62,8 @@ export default class baseApiClass {
       const data = res.data;
       return data;
     } catch (err) {
-      if (err.response.status === 401) {
+      console.error(err);
+      if (err.response?.status === 401) {
         const refreshed = await this.__user.refreshRefreshToken();
         if (refreshed) {
           return this.call(optionsParam, overwrite);

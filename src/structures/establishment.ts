@@ -14,7 +14,7 @@ export default class Establishment extends baseApiClass {
   private _fetchedRejecter!: (value?: Error | PromiseLike<Error>) => void;
   constructor(
     private _user: User,
-    private _establishmentPartial: {
+    _establishmentPartial: {
       id?: number;
       href?: string;
       raw?: api_vestiging_item;
@@ -28,7 +28,12 @@ export default class Establishment extends baseApiClass {
       this._fetchedResolver = resolve;
       this._fetchedRejecter = reject;
     });
-    if (_establishmentPartial.id) {
+
+    if (_establishmentPartial.raw) {
+      this._fetchedResolver(
+        this._storeEstablishment(_establishmentPartial.raw),
+      );
+    } else if (_establishmentPartial.id) {
       this.id = _establishmentPartial.id;
       this.fetchEstablishment().then((establishment) => {
         this._fetchedResolver(establishment);
@@ -38,10 +43,6 @@ export default class Establishment extends baseApiClass {
         (data: api_vestiging_item) => {
           this._fetchedResolver(this._storeEstablishment(data));
         },
-      );
-    } else if (_establishmentPartial.raw) {
-      this._fetchedResolver(
-        this._storeEstablishment(_establishmentPartial.raw),
       );
     } else throw new Error("You must enter an establishment partial");
   }
@@ -60,5 +61,13 @@ export default class Establishment extends baseApiClass {
     this.href = establishmentData.links[0].href!;
     this.name = establishmentData.naam;
     return this;
+  }
+
+  toObject() {
+    return {
+      id: this.id,
+      href: this.href,
+      name: this.name,
+    };
   }
 }

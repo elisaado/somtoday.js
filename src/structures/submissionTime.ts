@@ -45,4 +45,20 @@ export default class SubmissionTime extends baseApiClass {
     this.endSorting = raw.eindSortering;
     return this;
   }
+
+  toObject() {
+    return {
+      id: this.id,
+      description: this.description,
+      startValidity: this.startValidity,
+      endValidity: this.endValidity,
+      plagiarismDetection: this.plagiarismDetection,
+      sendMessageOnSubmission: this.sendMessageOnSubmission,
+      reminder: this.reminder,
+      submissionsAmount: this.submissionsAmount,
+      submissionsExpected: this.submissionsExpected,
+      startSorting: this.startSorting,
+      endSorting: this.endSorting,
+    };
+  }
 }

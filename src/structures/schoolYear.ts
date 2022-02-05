@@ -95,4 +95,14 @@ export default class SchoolYear extends baseApiClass {
     if (start === end) return [start];
     return [start, ...this._range(start + 1, end)];
   }
+
+  toObject() {
+    return {
+      id: this.id,
+      name: this.name,
+      fromDate: this.fromDate,
+      toDate: this.toDate,
+      isCurrent: this.isCurrent,
+    };
+  }
 }

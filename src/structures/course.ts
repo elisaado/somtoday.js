@@ -52,6 +52,15 @@ class Course extends baseApiClass {
     this.name = courseData.naam;
     return this;
   }
+
+  toObject() {
+    return {
+      id: this.id,
+      href: this.href,
+      abbreviation: this.abbreviation,
+      name: this.name,
+    };
+  }
 }
 
 export default Course;

@@ -78,7 +78,10 @@ class User extends baseApiClass {
     this.refreshRefreshToken = this.refreshRefreshToken.bind(this);
   }
   async getStudents(): Promise<Array<Student>> {
-    const rawStudents: api_leerling = await this.call({ url: `/leerlingen` });
+    const rawStudents: api_leerling = await this.call({
+      url: `/leerlingen`,
+      method: "GET",
+    });
     const { items } = rawStudents;
     return items.map((rawStudent) => {
       return new Student(this, {
@@ -145,6 +148,16 @@ class User extends baseApiClass {
     this.somtodayApiUrl = authInfo.somtoday_api_url;
     this.baseURL = `${authInfo.somtoday_api_url}` + endpoints.baseURL;
     return this;
+  }
+
+  toObject() {
+    return {
+      accessToken: this.accessToken,
+      refreshToken: this.refreshToken,
+      idToken: this.idToken,
+      somtodayApiUrl: this.somtodayApiUrl,
+      baseURL: this.baseURL,
+    };
   }
 }
 

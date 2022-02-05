@@ -12,7 +12,7 @@ import {
 } from "../somtoday_api_types";
 import Student from "./student";
 import User from "../user";
-import AppointmentType from "./AppointmentType";
+import AppointmentType from "./appointmentType";
 import { URLSearchParams } from "url";
 import endpoints from "../endpoints";
 
@@ -149,5 +149,33 @@ export default class Appointment extends baseApiClass {
     } else {
       return undefined;
     }
+  }
+
+  toObject() {
+    return {
+      id: this.id,
+      href: this.href,
+      appointmentType: this.appointmentType.toObject(),
+
+      startDateTime: this.startDateTime,
+      endDateTime: this.endDateTime,
+      startLessonHour: this.startLessonHour,
+      endLessonHour: this.endLessonHour,
+
+      title: this.title,
+      description: this.description,
+
+      attendanceRegistrationMandatory: this.attendanceRegistrationMandatory,
+      attendanceRegistrationProcessed: this.attendanceRegistrationProcessed,
+
+      appointmentStatus: this.appointmentStatus,
+
+      teacherAbbreviation: this.teacherAbbreviation,
+      students: this.students?.map((student) => student.toObject()),
+      course: this.course?.toObject(),
+
+      establishment: this.establishment.toObject(),
+      attachments: this.attachments.map((attachment) => attachment.toObject()),
+    };
   }
 }

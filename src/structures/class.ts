@@ -74,4 +74,16 @@ export default class Class extends baseApiClass {
   get schoolYear(): SchoolYear {
     return new SchoolYear(this._user, { raw: this.raw_schoolYear });
   }
+  toObject() {
+    return {
+      id: this.id,
+      href: this.href,
+      UUID: this.UUID,
+      name: this.name,
+      schoolYear: this.schoolYear.toObject(),
+      course: this.course.toObject(),
+      hasRootGroup: this.hasRootGroup,
+      examFileSupported: this.examFileSupported,
+    };
+  }
 }

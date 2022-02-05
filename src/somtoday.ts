@@ -1,7 +1,7 @@
 import axios from "axios";
 import Organisation from "./structures/organisation";
 
-import Fuse = require("fuse.js");
+import Fuse from "fuse.js";
 import { api_organisaties } from "./somtoday_api_types";
 
 const fuseOptions = {

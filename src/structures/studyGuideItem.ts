@@ -37,7 +37,7 @@ export default class StudyGuideItem extends baseApiClass {
   private _fetchedRejecter!: (value?: Error | PromiseLike<Error>) => void;
   constructor(
     private _user: User,
-    private _Partial: {
+    _Partial: {
       id?: number;
       href?: string;
       raw?: api_studiewijzerItem_item;
@@ -108,5 +108,24 @@ export default class StudyGuideItem extends baseApiClass {
       (submissionTime) =>
         new SubmissionTime(this._user, { raw: submissionTime }),
     );
+  }
+
+  toObject() {
+    return {
+      id: this.id,
+      href: this.href,
+      topic: this.topic,
+      homeworkType: this.homeworkType,
+      description: this.description,
+      submissionPeriods: this.submissionPeriods,
+      teachingMaterials: this.teachingMaterials,
+      projectGroups: this.projectGroups,
+      show: this.show,
+      note: this.note,
+      noteVisibleForStudents: this.noteVisibleForStudents,
+      attachments: this.attachments.map((a) => a.toObject()),
+      externalMaterials: this.externalMaterials.map((a) => a.toObject()),
+      submissionTimes: this.submissionTimes.map((a) => a.toObject()),
+    };
   }
 }

@@ -32,4 +32,15 @@ export default class ExternalMaterial extends baseApiClass {
     this.visibleForStudents = raw.zichtbaarVoorLeerlingen;
     return this;
   }
+
+  toObject() {
+    return {
+      id: this.id,
+      uri: this.uri,
+      description: this.description,
+      contentType: this.contentType,
+      sorting: this.sorting,
+      visibleForStudents: this.visibleForStudents,
+    };
+  }
 }

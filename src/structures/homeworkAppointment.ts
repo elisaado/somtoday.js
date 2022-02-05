@@ -12,7 +12,6 @@ import {
   api_inlevermomenten_item,
   api_lesgroep_item,
   api_studiewijzerItem_item,
-  api_studiewijzer_item,
   api_vestiging_item,
 } from "../somtoday_api_types";
 import User from "../user";
@@ -21,7 +20,6 @@ import ExternalMaterial from "./externalMaterial";
 import SubmissionPeriod from "./submissionTime";
 import submissionTime from "./submissionTime";
 import SubmissionTime from "./submissionTime";
-import StudyGuide from "./studyGuide";
 import StudyGuideItem from "./studyGuideItem";
 
 export default class HomeworkAppointment extends baseApiClass {
@@ -32,7 +30,7 @@ export default class HomeworkAppointment extends baseApiClass {
   public creationDateTime!: Date | undefined;
 
   private _raw_class!: api_lesgroep_item;
-  private _raw_studyGuide!: api_studiewijzer_item;
+  // private _raw_studyGuide!: api_studiewijzer_item;
   private _raw_studyGuideItem!: api_studiewijzerItem_item;
 
   public fetched: Promise<HomeworkAppointment>;
@@ -42,7 +40,7 @@ export default class HomeworkAppointment extends baseApiClass {
   private _fetchedRejecter!: (value?: Error | PromiseLike<Error>) => void;
   constructor(
     private _user: User,
-    private _homeworkAppointmentPartial: {
+    _homeworkAppointmentPartial: {
       id?: number;
       href?: string;
       raw?: api_huiswerk_studiewijzer_item;
@@ -57,7 +55,12 @@ export default class HomeworkAppointment extends baseApiClass {
       this._fetchedResolver = resolve;
       this._fetchedRejecter = reject;
     });
-    if (_homeworkAppointmentPartial.id) {
+
+    if (_homeworkAppointmentPartial.raw) {
+      this._fetchedResolver(
+        this._storeHomeworkAppointment(_homeworkAppointmentPartial.raw),
+      );
+    } else if (_homeworkAppointmentPartial.id) {
       this.id = _homeworkAppointmentPartial.id;
       this.fetchHomeworkAppointment().then((homeworkAppointment) => {
         this._fetchedResolver(homeworkAppointment);
@@ -68,10 +71,6 @@ export default class HomeworkAppointment extends baseApiClass {
         (raw: api_huiswerk_studiewijzer_item) => {
           this._fetchedResolver(this._storeHomeworkAppointment(raw));
         },
-      );
-    } else if (_homeworkAppointmentPartial.raw) {
-      this._fetchedResolver(
-        this._storeHomeworkAppointment(_homeworkAppointmentPartial.raw),
       );
     }
   }
@@ -86,6 +85,8 @@ export default class HomeworkAppointment extends baseApiClass {
   private _storeHomeworkAppointment(
     raw: api_huiswerk_studiewijzer_item,
   ): HomeworkAppointment {
+    this.id = raw.links[0].id;
+    this.href = raw.links[0].href;
     this.dateTime = new Date(raw.datumTijd);
     this.creationDateTime = raw.aangemaaktOpDatumTijd
       ? new Date(raw.aangemaaktOpDatumTijd)
@@ -93,7 +94,6 @@ export default class HomeworkAppointment extends baseApiClass {
     this.sorting = raw.sortering;
 
     this._raw_class = raw.lesgroep;
-    this._raw_studyGuide = raw.studiewijzer;
     this._raw_studyGuideItem = raw.studiewijzerItem;
     return this;
   }
@@ -101,10 +101,24 @@ export default class HomeworkAppointment extends baseApiClass {
   get class(): Class {
     return new Class(this._user, { raw: this._raw_class });
   }
-  get studyGuide(): StudyGuide {
-    return new StudyGuide(this._user, { raw: this._raw_studyGuide });
-  }
+  // get studyGuide(): StudyGuide {
+  //   return new StudyGuide(this._user, { raw: this._raw_studyGuide });
+  // }
   get studyGuideItem(): StudyGuideItem {
+    if (!this._raw_studyGuideItem) throw new Error("No study guide item found");
     return new StudyGuideItem(this._user, { raw: this._raw_studyGuideItem });
+  }
+
+  public toObject() {
+    return {
+      id: this.id,
+      href: this.href,
+      sorting: this.sorting,
+      dateTime: this.dateTime,
+      creationDateTime: this.creationDateTime,
+      class: this.class.toObject(),
+      // studyGuide: this.studyGuide.toObject(),
+      studyGuideItem: this.studyGuideItem.toObject(),
+    };
   }
 }

@@ -11,8 +11,8 @@ import {
 } from "../somtoday_api_types";
 import Appointment from "../structures/appointment";
 import HomeworkAppointment from "../structures/homeworkAppointment";
-import HomeworkDate from "../structures/HomeworkDate";
-import HomeworkWeek from "../structures/HomeworkWeek";
+import HomeworkDate from "../structures/homeworkDate";
+import HomeworkWeek from "../structures/homeworkWeek";
 import User from "../user";
 
 export default class HomeworkManager extends baseApiClass {
@@ -129,6 +129,8 @@ export default class HomeworkManager extends baseApiClass {
         if (!homeworks.has(item.links[0].id)) {
           // @ts-ignore
           const newClass = new toClass(this._user, { raw: item });
+
+          console.log(newClass.id);
           homeworks.set(newClass.id, newClass);
         }
       }
@@ -137,7 +139,6 @@ export default class HomeworkManager extends baseApiClass {
     }
 
     homeworks.sort((a, b) => b.dateTime.valueOf() - a.dateTime.valueOf());
-
     return homeworks;
   }
 }

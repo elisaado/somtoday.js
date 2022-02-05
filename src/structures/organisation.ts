@@ -29,7 +29,16 @@ class Organization {
     } else if (credentials.password.trim().length === 0) {
       throw new Error("No password provided");
     }
-    return new User(credentials);
+    const user = new User(credentials);
+    await user.authenticated;
+    return user;
+  }
+  toObject() {
+    return {
+      uuid: this.uuid,
+      name: this.name,
+      location: this.location,
+    };
   }
 }
 

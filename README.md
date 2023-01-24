@@ -2,13 +2,13 @@
 
 A JavaScript library for the SOMtoday REST API.
 
-This project uses the [the somtoday api docs](https://github.com/elisaado/somtoday-api-docs).
-I you need any help with this project feel free to join our discord!
+This project uses [the somtoday api docs](https://github.com/elisaado/somtoday-api-docs).
+If you need any help with this project feel free to join our discord!
 [![Discord Chat](https://img.shields.io/discord/789249810032361502.svg)](https://discord.gg/yE3e3erCut)
 
 ## Installation
 
-Use either npm, or yarn to install add the library to your project
+Use either npm, or yarn to install the library to your project
 
 `npm i somtoday.js --save`
 

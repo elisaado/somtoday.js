@@ -4,7 +4,7 @@ export interface api_auth_item {
   somtoday_api_url: string;
   somtoday_oop_url: string;
   scope: "openid";
-  somtoday_tenant: string;
+  somtoday_organisatie_afkorting: string;
   id_token: string;
   token_type: string;
   expires_in: number;

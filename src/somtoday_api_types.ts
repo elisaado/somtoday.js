@@ -10,7 +10,7 @@ export interface api_auth_item {
   expires_in: number;
 }
 
-// Raw api results
+// Raw API results
 export interface api_leerling {
   items: Array<api_leerling_item>;
 }
@@ -61,7 +61,7 @@ export interface api_cijfer_item {
   herkansingstype: api_cijfer_herkansingstype;
   resultaat?: string; // string representation of an integer
   geldendResultaat?: string; // string representation of an integer
-  datumInvoer: string; //ISO-8601 like "2020-09-24T21:03:16.992+02:00"
+  datumInvoer: string; // ISO-8601 like "2020-09-24T21:03:16.992+02:00"
   teltNietmee: boolean;
   toetsNietGemaakt: boolean;
   leerjaar: number;
@@ -110,9 +110,9 @@ export interface api_afspraken_item_type {
   links: Array<api_link_href>;
   permissions: Array<api_permission>;
   additionalObjects: any;
-  naam: string; //"les";
-  omschrijving: string; //"les";
-  standaardKleur: number; // cool?
+  naam: string; // "les";
+  omschrijving: string; // "les";
+  standaardKleur: number; // Standard color
   categorie: string; // "Rooster";
   activiteit: string; // "Verplicht";
   percentageIIVO: number; // 0;
@@ -134,27 +134,27 @@ export interface api_bijlage_item {
   omschrijving: string; // The name of the file most of the time
   uploadContext: api_uploadContext_item;
   assemblyResults: Array<api_assemblyResults_item>;
-  sortering: number; //0;
+  sortering: number; // 0;
   zichtbaarVoorLeerling: boolean;
 }
 export interface api_uploadContext_item {
   links: Array<api_link>;
   permissions: Array<api_permission>;
   additionalObjects: any;
-  fileState: api_uploadContext_item_fileState; //"ASSEMBLY_COMPLETED";
-  assemblyId: string; //"eb166b7581284ce6b1f96a8fe40e88af";
+  fileState: api_uploadContext_item_fileState; // "ASSEMBLY_COMPLETED";
+  assemblyId: string; // "eb166b7581284ce6b1f96a8fe40e88af";
 }
 
 export interface api_assemblyResults_item {
   links: Array<api_link>;
   permissions: Array<api_permission>;
   additionalObjects: any;
-  assemblyFileType: string; //"MISC";
-  fileExtension: string; //"ppt";
-  mimeType: string; //"application/vnd.ms-powerpoint";
+  assemblyFileType: string; // "MISC";
+  fileExtension: string; // "ppt";
+  mimeType: string; // "application/vnd.ms-powerpoint";
   fileSize: number; // in Bytes
-  fileType: string; //"misc";
-  fileUrl: string; //"https://ASDFASDF-ASDFASDF.ssl.cf3.rackcdn.com/documents/ASDFASDF/52/ASDFASDF/adsf.ppt";
+  fileType: string; // "misc";
+  fileUrl: string; // "https://ASDFASDF-ASDFASDF.ssl.cf3.rackcdn.com/documents/ASDFASDF/52/ASDFASDF/adsf.ppt";
   sslUrl: string; // "https://ASDFASDF-ASDFASDF.ssl.cf3.rackcdn.com/documents/ASDFASDF/52/ASDFASDF/asdf.ppt";
   fileName: string; // "asdf.ppt";
 }
@@ -168,7 +168,7 @@ export interface api_huiswerk_studiewijzer_item {
   studiewijzerItem: api_studiewijzerItem_item;
   sortering: number;
   lesgroep: api_lesgroep_item;
-  datumTijd: string; //"2020-09-24T11:45:00.000+02:00";
+  datumTijd: string; // "2020-09-24T11:45:00.000+02:00";
   aangemaaktOpDatumTijd?: string; // "2020-09-03T12:27:00.000+02:00";
 }
 export interface api_lesgroep_item {
@@ -199,7 +199,7 @@ export interface api_huiswerk_datum_item {
   additionalObjects: any;
   // studiewijzer: api_studiewijzer_item;
   studiewijzerItem: api_studiewijzerItem_item;
-  sortering: 0; // TODO: what is this
+  sortering: 0; // TODO: what is this?
   datumTijd: string; // ISO-8601 "2020-10-08T00:00:00.000+02:00";
   lesgroep: api_lesgroep_item;
 }
@@ -217,7 +217,7 @@ export interface api_studiewijzerItem_item {
   additionalObjects: any;
   onderwerp: string; // The text that is visible without having to click on an appointment
   huiswerkType: api_huiswerkType;
-  omschrijving: string; //with html: "<p><em>Nieuw Nederlands</em> - Toets Leesvaardigheid</p><p><br></p><p>Leer de theorie van Lezen hoofdstuk 1 t/m 68 (blz. 34 t/m 419).</p><p><br></p>"";
+  omschrijving: string; // with html: "<p><em>Nieuw Nederlands</em> - Toets Leesvaardigheid</p><p><br></p><p>Leer de theorie van Lezen hoofdstuk 1 t/m 68 (blz. 34 t/m 419).</p><p><br></p>"";
   inleverperiodes: boolean;
   lesmateriaal: boolean;
   projectgroepen: boolean;
@@ -239,7 +239,7 @@ export interface api_externeMaterialen_item {
   zichtbaarVoorLeerlingen: boolean;
 }
 export interface api_inlevermomenten_item {
-  // TODO: this needs more info, i only had one data point
+  // TODO: this needs more info, I only had one data point
   links: Array<api_link>;
   permissions: Array<api_permission>;
   additionalObjects: object;
@@ -281,22 +281,22 @@ export interface oidcurl {
 
 // Extra stuff
 export interface api_link {
-  id: number; //id id;
+  id: number; // id id;
   rel: api_link_rel;
   type: api_link_type;
 }
 export interface api_link_href {
-  id: number; //id id;
+  id: number; // id id;
   rel: api_link_rel;
   type: api_link_type;
   href: string; // api link to fetch student ;
 }
 
 export interface api_permission {
-  full: string; //"api_link_type:operation:instance";
+  full: string; // "api_link_type:operation:instance";
   type: api_link_type;
   operations: Array<api_permissions_operation>; // currently only "READ";
-  instances: Array<string>; //"INSTANCE(student id)";
+  instances: Array<string>; // "INSTANCE(student id)";
 }
 export enum api_link_rel {
   "self",
@@ -323,7 +323,7 @@ export type api_UUID = string; // "ab123acd-abc1-1cba-blah-asd3a2df2sdf";
 export enum geslacht {
   "Man",
   "Vrouw",
-  // Meer?
+  // More? Get woke...
 }
 export enum api_cijfer_type {
   "Toetskolom",

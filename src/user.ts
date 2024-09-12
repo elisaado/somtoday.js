@@ -57,7 +57,13 @@ class User extends baseApiClass {
         let c, d, r;
         if (cookie2 !== false) {
           let b1 = await new Promise((resolve, reject) => (r = https.request(`https://inloggen.somtoday.nl/?0-1.-panel-signInForm&auth=${a}`, { method: "POST", headers: { 'Origin': 'https://inloggen.somtoday.nl', 'Content-Type': 'application/x-www-form-urlencoded', 'Cookie': cookie + "; " + cookie2 } }, (r) => r.on('data', (b) => { }).on('end', () => resolve())), r.end(`loginLink=x&usernameFieldPanel%3AusernameFieldPanel_body%3AusernameField=${encodeURIComponent(credentials.username)}`)));
-          let b2 = await new Promise((resolve, reject) => (r = https.request(`https://inloggen.somtoday.nl/login?2-1.-passwordForm`, { method: "POST", headers: { 'Origin': 'https://inloggen.somtoday.nl', 'Content-Type': 'application/x-www-form-urlencoded', 'Cookie': cookie + "; " + cookie2 } }, (r) => r.on('data', (b) => { }).on('end', () => resolve(r.headers.location.split('/callback?code=')[1].split("&")[0]))), r.end(`loginLink=x&passwordFieldPanel%3ApasswordFieldPanel_body%3ApasswordField=${encodeURIComponent(credentials.password)}`)));
+          try {
+            let b2 = await new Promise((resolve, reject) => (r = https.request(`https://inloggen.somtoday.nl/login?2-1.-passwordForm`, { method: "POST", headers: { 'Origin': 'https://inloggen.somtoday.nl', 'Content-Type': 'application/x-www-form-urlencoded', 'Cookie': cookie + "; " + cookie2 } }, (r) => r.on('data', (b) => { }).on('end', () => resolve(r.headers.location.split('/callback?code=')[1].split("&")[0]))), r.end(`loginLink=x&passwordFieldPanel%3ApasswordFieldPanel_body%3ApasswordField=${encodeURIComponent(credentials.password)}`)));
+          } catch (e) {
+              if (e instanceof TypeError) {
+                throw new Error("Invalid Username");
+              }
+          }
           c = await new Promise((resolve, reject) => (d = '', r = https.request(`https://inloggen.somtoday.nl/oauth2/token`, { method: "POST", headers: { 'Content-Type': 'application/x-www-form-urlencoded', } }, (r) => r.on('data', (b) => d += b).on('end', () => resolve(d))), r.end(`code=${b2}&grant_type=authorization_code&client_id=D50E0C06-32D1-4B41-A137-A9A850C892C2`)));
         } else {
           let b = await new Promise((resolve, reject) => (r = https.request(`https://inloggen.somtoday.nl/?-1.-panel-signInForm&auth=${a}`, { method: "POST", headers: { 'Origin': 'https://inloggen.somtoday.nl', 'Content-Type': 'application/x-www-form-urlencoded', } }, (r) => r.on('data', (b) => { }).on('end', () => resolve(r.headers.location.split('/callback?code=')[1].split("&")[0]))), r.end(`loginLink=x&usernameFieldPanel%3AusernameFieldPanel_body%3AusernameField=${encodeURIComponent(credentials.username)}&passwordFieldPanel%3ApasswordFieldPanel_body%3ApasswordField=${encodeURIComponent(credentials.password)}`)));

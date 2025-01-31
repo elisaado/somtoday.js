@@ -111,7 +111,7 @@ class User extends baseApiClass {
     const body = {
       grant_type: "refresh_token",
       refresh_token: refreshToken || this.refreshToken,
-      client_id: APP_ID,
+      client_id: JSON.parse(Buffer.from((refreshToken || this.refreshToken).split(".")[1],"base64")).client_id,
     };
 
     return axios

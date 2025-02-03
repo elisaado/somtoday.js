@@ -18,7 +18,7 @@ export default class AppointmentManager extends baseApiClass {
   }
   /**
    * Gets an appointment, or appointments from this user.
-   * @param {number|AppointmentQueryOptions} [appointment] The id of the appointment to fetch, or query paramaters.
+   * @param {number|AppointmentQueryOptions} [appointment] The id of the appointment to fetch, or query parameters.
    * @param {boolean} [cache=true] Whether to cache the messages.
    * @param {boolean} [force=false] Whether to skip the cache check and request the API.
    * @returns {Promise<Appointment>|Promise<Collection<number, Appointment>>}

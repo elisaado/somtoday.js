@@ -19,7 +19,7 @@ interface Query {
 }
 
 class SOMToday {
-  organizationsURL: string = "https://servers.somtoday.nl/organisaties.json";
+  organizationsURL: string = "https://raw.githubusercontent.com/NONtoday/organisaties.json/refs/heads/main/organisaties.json";
 
   // Retrieve all organizations
 
